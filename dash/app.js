@@ -270,6 +270,18 @@ async function initDatabase() {
             console.log('Seeded default Cloud categories and products successfully.');
         }
 
+        // Ensure default admin user exists
+        const defaultAdminEmail = 'admin@gmail.com';
+        const existingAdmin = await dbGet('SELECT id FROM users WHERE email = ?', [defaultAdminEmail]);
+        if (!existingAdmin) {
+            console.log('Seeding default administrator account...');
+            const adminId = uuidv4();
+            const adminHashed = bcrypt.hashSync('admin', SALT_ROUNDS);
+            await runDb('INSERT INTO users (id, email, password, firstName, lastName, phone, address, city, state, postalCode, isAdmin, isActive) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, 1, 1)',
+                [adminId, defaultAdminEmail, adminHashed, 'System', 'Admin', '1234567890']);
+            console.log('Seeded admin@gmail.com with password admin successfully.');
+        }
+
         console.log('Database initialized successfully.');
     } catch (err) {
         console.error('Error initializing database:', err);
@@ -1290,8 +1302,7 @@ app.post('/register', requireGuest, async (req, res) => {
     }
     const hashed = helpers.hashPassword(password);
     const userId = uuidv4();
-    const count = await helpers.countRows('users');
-    const isAdmin = count === 0;
+    const isAdmin = false;
     try {
         await runDb('INSERT INTO users (id, email, password, firstName, lastName, phone, address, city, state, postalCode, isAdmin) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?)',
             [userId, email, hashed, firstName, lastName, phone, isAdmin]);
