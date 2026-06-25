@@ -285,8 +285,9 @@ async function initDatabase() {
         console.log('Database initialized successfully.');
     } catch (err) {
         console.error('Error initializing database:', err);
-        if (err.message && err.message.includes('SQLITE_CORRUPT')) {
-            console.error('CRITICAL: SQLite database file is corrupted! Attempting to heal by recreating the database...');
+        const errMsg = err.message || '';
+        if (errMsg.includes('SQLITE_CORRUPT') || errMsg.includes('unsupported file format') || errMsg.includes('file is not a database')) {
+            console.error('CRITICAL: SQLite database file is corrupted or unsupported! Attempting to heal by recreating the database...');
             try {
                 db.close((closeErr) => {
                     if (closeErr) console.error('Error closing corrupt DB:', closeErr);
