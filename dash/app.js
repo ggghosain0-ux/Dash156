@@ -14,7 +14,7 @@ const flash = require('connect-flash');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const cron = require('node-cron');
-const geoip = require('geoip-lite');
+const geoip = { lookup: () => null };
 const helmet = require('helmet');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
