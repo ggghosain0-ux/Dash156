@@ -1,4 +1,4 @@
-VOIDORA CLOUD Hosting Dashboard
+# VOIDORA CLOUD Hosting Dashboard
 
 VOIDORA CLOUD is a modern hosting management dashboard designed to simplify server and application management. It provides an easy-to-use interface for deploying, monitoring, and managing your hosting environment.
 
@@ -83,3 +83,8 @@ This project is provided as-is. Feel free to modify and customize it according t
 ---
 
 Dash156 — Simple, Fast, and Powerful Hosting Management Dashboard
+
+default login
+
+email- admin@gmail.com
+password- admin
