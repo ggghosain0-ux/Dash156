@@ -1,0 +1,102 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title"><%= title %></h3>
+        <a href="/admin/products" class="btn btn-outline">Back to Products</a>
+    </div>
+    <div style="padding: 1.5rem;">
+        <form action="<%= product.id ? '/admin/products/' + product.id : '/admin/products' %>" 
+              method="POST" enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label class="form-label">Product Name</label>
+                <input type="text" name="name" value="<%= product.name || '' %>" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="4" required><%= product.description || '' %></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-control" required>
+                    <option value="">Select Category</option>
+                    <% categories.forEach(cat => { %>
+                    <option value="<%= cat.slug %>" <%= product.categorySlug === cat.slug ? 'selected' : '' %>>
+                        <%= cat.name %>
+                    </option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">CPU</label>
+                    <input type="text" name="cpu" value="<%= product.specs ? product.specs.cpu : '' %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">RAM (GB)</label>
+                    <input type="number" name="ram" value="<%= product.specs ? product.specs.ram.replace(' GB', '') : '' %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Disk (GB)</label>
+                    <input type="number" name="disk" value="<%= product.specs ? product.specs.disk.replace(' GB', '') : '' %>" class="form-control" required>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Monthly Price (₹)</label>
+                    <input type="number" step="0.01" name="priceMonthly" value="<%= product.priceMonthly || '' %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Quarterly Price (₹)</label>
+                    <input type="number" step="0.01" name="priceQuarterly" value="<%= product.priceQuarterly || '' %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Yearly Price (₹)</label>
+                    <input type="number" step="0.01" name="priceYearly" value="<%= product.priceYearly || '' %>" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Product Image</label>
+                <input type="file" name="image" accept="image/*" class="form-control" 
+                       onchange="previewImage(this, 'imagePreview')">
+                
+                <% if (product.image) { %>
+                <div style="margin-top: 1rem;">
+                    <img src="<%= product.image %>" id="imagePreview" class="img-preview">
+                    <div style="margin-top: 0.5rem;">
+                        <label>
+                            <input type="checkbox" name="removeImage"> Remove current image
+                        </label>
+                    </div>
+                </div>
+                <% } else { %>
+                <div style="margin-top: 1rem;">
+                    <img src="" id="imagePreview" class="img-preview" style="display: none;">
+                </div>
+                <% } %>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="isActive" <%= product.isActive ? 'checked' : '' %>> Active Product
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <%= product.id ? 'Update Product' : 'Create Product' %>
+            </button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

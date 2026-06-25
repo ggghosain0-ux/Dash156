@@ -1,0 +1,79 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Users</h3>
+        <div class="header-actions">
+            <select class="form-control" onchange="window.location.href='/admin/users?status=' + this.value" style="width: auto;">
+                <option value="all" <%= currentStatus === 'all' ? 'selected' : '' %>>All Users</option>
+                <option value="active" <%= currentStatus === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="inactive" <%= currentStatus === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                <option value="admin" <%= currentStatus === 'admin' ? 'selected' : '' %>>Admins</option>
+            </select>
+            <a href="/admin/users/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add User
+            </a>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                <tr>
+                    <td><%= user.firstName %> <%= user.lastName %></td>
+                    <td><%= user.email %></td>
+                    <td><%= user.phone || 'N/A' %></td>
+                    <td>
+                        <span class="badge <%= user.isAdmin ? 'badge-info' : 'badge-secondary' %>">
+                            <%= user.isAdmin ? 'Admin' : 'User' %>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge <%= user.isActive ? 'badge-success' : 'badge-danger' %>">
+                            <%= user.isActive ? 'Active' : 'Inactive' %>
+                        </span>
+                    </td>
+                    <td><%= moment(user.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <a href="/admin/users/<%= user.id %>" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>&status=<%= currentStatus %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>&status=<%= currentStatus %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>&status=<%= currentStatus %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

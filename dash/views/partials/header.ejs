@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= siteName %></title>
+    <link rel="shortcut icon" href="<%= siteFavicon %>" type="image/x-icon">
+    <meta name="description" content="<%= siteDescription || 'Reliable Hosting' %>">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <a href="/view" class="logo">
+                <% if (siteLogo && siteLogo !== '/images/default-logo.png') { %>
+                    <img src="<%= siteLogo %>" alt="<%= siteName %>" class="logo-img" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-fallback" style="display: none;">
+                        <i class="fas fa-server"></i>
+                    </div>
+                <% } else { %>
+                    <div class="logo-fallback">
+                        <i class="fas fa-server"></i>
+                    </div>
+                <% } %>
+                <span><%= siteName %></span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/view" class="nav-link <%= activePage === 'view' ? 'active' : '' %>">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="/products" class="nav-link <%= activePage === 'products' ? 'active' : '' %>">
+                    <i class="fas fa-server"></i> Products
+                </a>
+                
+                <% if (isLoggedIn) { %>
+                    <a href="/dashboard" class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="/orders" class="nav-link <%= activePage === 'orders' ? 'active' : '' %>">
+                        <i class="fas fa-shopping-bag"></i> Orders
+                    </a>
+                    <a href="/tickets" class="nav-link <%= activePage === 'tickets' ? 'active' : '' %>">
+                        <i class="fas fa-headset"></i> Support
+                    </a>
+                <% } %>
+            </div>
+            
+            <div class="user-menu">
+                <% if (isLoggedIn) { %>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-text-secondary">Welcome, <%= user.firstName %></span>
+                        <a href="/profile" class="btn btn-outline btn-sm">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="/logout" class="btn btn-outline btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="btn btn-outline">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="/register" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Register
+                    </a>
+                <% } %>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Flash Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="flash-messages">
+            <% success.forEach(function(message) { %>
+                <div class="flash-message flash-success">
+                    <i class="fas fa-check-circle"></i> <%= message %>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="flash-messages">
+            <% error.forEach(function(message) { %>
+                <div class="flash-message flash-error">
+                    <i class="fas fa-exclamation-circle"></i> <%= message %>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+
+    <main class="main-content">

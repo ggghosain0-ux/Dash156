@@ -1,0 +1,170 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up" style="max-width: 500px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">
+            <%= isRetry ? 'Retry Payment' : 'Complete Payment' %>
+        </h1>
+        <p class="page-subtitle">
+            <%= isRetry ? 'Complete your pending order payment' : 'Secure payment via Razorpay' %>
+        </p>
+    </div>
+
+    <div class="category-card text-center">
+        <div class="p-3 rounded mb-3" style="background: var(--bg-tertiary);">
+            <div class="text-3xl font-bold text-primary-light mb-1">₹<%= order.amount %></div>
+            <div class="text-text-secondary">Order #<%= order.id %></div>
+        </div>
+
+        <div id="payment-status" class="hidden p-3 rounded mb-3">
+            <!-- Payment status will be shown here -->
+        </div>
+
+        <button id="rzp-button" class="btn btn-primary w-full mb-3">
+            <i class="fas fa-credit-card"></i> 
+            <%= isRetry ? 'Retry Payment' : 'Pay with Razorpay' %>
+        </button>
+
+        <div class="text-center text-text-secondary text-sm">
+            <i class="fas fa-lock"></i> Secure payment processed by Razorpay
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="category-card mt-3">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Accepted Payment Methods</h3>
+        
+        <div class="flex justify-center gap-3 text-2xl text-text-muted">
+            <i class="fab fa-cc-visa" title="Visa"></i>
+            <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+            <i class="fab fa-cc-amex" title="American Express"></i>
+            <i class="fab fa-cc-discover" title="Discover"></i>
+            <i class="fas fa-university" title="Net Banking"></i>
+            <i class="fas fa-wallet" title="Wallets"></i>
+            <i class="fas fa-qrcode" title="UPI"></i>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('rzp-button').onclick = function(e) {
+        e.preventDefault();
+        
+        const amount = <%= order.amount %> * 100; // Convert to paise
+        const orderId = '<%= order.id %>';
+        
+        // Show loading state
+        const button = document.getElementById('rzp-button');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        button.disabled = true;
+
+        fetch('/create-razorpay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: <%= order.amount %>,
+                orderId: '<%= order.id %>'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showPaymentStatus('error', data.error);
+                resetButton();
+                return;
+            }
+
+            const options = {
+                key: '<%= key %>',
+                amount: data.amount,
+                currency: 'INR',
+                name: '<%= siteName %>',
+                description: 'Order #<%= order.id %>',
+                order_id: data.orderId,
+                handler: function(response) {
+                    // Verify payment on server
+                    verifyPayment(response, orderId);
+                },
+                prefill: {
+                    name: '<%= user.firstName %> <%= user.lastName %>',
+                    email: '<%= user.email %>'
+                },
+                theme: {
+                    color: '#6366f1'
+                },
+                modal: {
+                    ondismiss: function() {
+                        resetButton();
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showPaymentStatus('error', 'Failed to initialize payment');
+            resetButton();
+        });
+    };
+
+    function verifyPayment(paymentResponse, orderId) {
+        const statusDiv = document.getElementById('payment-status');
+        
+        fetch('/verify-razorpay-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+                orderId: orderId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPaymentStatus('success', 'Payment verified successfully! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '/orders/' + orderId;
+                }, 2000);
+            } else {
+                showPaymentStatus('error', data.error || 'Payment verification failed');
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showPaymentStatus('error', 'Verification failed');
+            resetButton();
+        });
+    }
+
+    function showPaymentStatus(type, message) {
+        const statusDiv = document.getElementById('payment-status');
+        statusDiv.className = `p-3 rounded mb-3 ${
+            type === 'success' ? 'bg-success-20 text-success' : 
+            type === 'error' ? 'bg-danger-20 text-danger' : 
+            'bg-warning-20 text-warning'
+        }`;
+        statusDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+        `;
+        statusDiv.classList.remove('hidden');
+    }
+
+    function resetButton() {
+        const button = document.getElementById('rzp-button');
+        button.innerHTML = '<i class="fas fa-credit-card"></i> <%= isRetry ? "Retry Payment" : "Pay with Razorpay" %>';
+        button.disabled = false;
+    }
+</script>
+
+<%- include('../partials/footer') %>

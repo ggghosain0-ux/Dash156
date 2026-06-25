@@ -1,0 +1,162 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up mx-auto max-w-5xl px-3">
+
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Manage your account information and preferences</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Sidebar Navigation -->
+        <div class="category-card p-4">
+            <h3 class="text-xl font-semibold mb-3">Account Settings</h3>
+
+            <nav class="space-y-2">
+
+                <!-- Profile -->
+                <a href="/profile"
+                   class="flex items-center gap-2 p-2 rounded transition
+                   <%= activePage === 'profile' ? 'bg-primary/20 text-primary-light' : 'text-text-secondary hover:text-text-primary hover:bg-primary/10' %>">
+                    <i class="fas fa-user"></i> Personal Information
+                </a>
+
+                <!-- Security -->
+                <a href="/profile/security"
+                   class="flex items-center gap-2 p-2 rounded transition
+                   <%= activePage === 'security' ? 'bg-primary/20 text-primary-light' : 'text-text-secondary hover:text-text-primary hover:bg-primary/10' %>">
+                    <i class="fas fa-shield-alt"></i> Security
+                </a>
+
+                <!-- Orders -->
+                <a href="/orders" class="flex items-center gap-2 p-2 rounded transition
+                   text-text-secondary hover:text-text-primary hover:bg-primary/10">
+                    <i class="fas fa-shopping-bag"></i> Order History
+                </a>
+
+                <!-- Tickets -->
+                <a href="/tickets" class="flex items-center gap-2 p-2 rounded transition
+                   text-text-secondary hover:text-text-primary hover:bg-primary/10">
+                    <i class="fas fa-headset"></i> Support Tickets
+                </a>
+
+                <!-- ⭐ Admin Button (ONLY visible to admins) -->
+                <% if (user && user.isAdmin) { %>
+                <a href="/admin/dashboard"
+                   class="flex items-center gap-2 p-2 rounded transition text-red-500 hover:bg-red-100">
+                    <i class="fas fa-user-shield"></i> Admin Dashboard
+                </a>
+                <% } %>
+
+            </nav>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="category-card lg:col-span-2 p-4">
+            <h3 class="text-xl font-semibold mb-3">Personal Information</h3>
+
+            <form action="/profile" method="POST" class="space-y-4">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">First Name *</label>
+                        <input type="text" name="firstName" class="form-input"
+                               value="<%= user.firstName %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Last Name *</label>
+                        <input type="text" name="lastName" class="form-input"
+                               value="<%= user.lastName %>" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address *</label>
+                    <input type="email" class="form-input opacity-70 cursor-not-allowed"
+                           value="<%= user.email %>" disabled>
+                    <small class="text-text-muted">Email cannot be changed</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone Number *</label>
+                    <input type="tel" name="phone" class="form-input"
+                           value="<%= user.phone || '' %>" placeholder="+1 (555) 123-4567" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="address" class="form-input"
+                           value="<%= user.address || '' %>" placeholder="Street address">
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" name="city" class="form-input"
+                               value="<%= user.city || '' %>" placeholder="City">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <input type="text" name="state" class="form-input"
+                               value="<%= user.state || '' %>" placeholder="State">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Postal Code</label>
+                    <input type="text" name="postalCode" class="form-input"
+                           value="<%= user.postalCode || '' %>" placeholder="Postal code">
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2 w-full lg:w-auto">
+                    <i class="fas fa-save"></i> Update Profile
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Account Overview -->
+    <div class="category-card mt-4 p-4">
+        <h3 class="text-xl font-semibold mb-3">Account Overview</h3>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+
+            <div>
+                <div class="text-2xl font-bold text-primary-light">
+                    <%= moment(user.createdAt).format('YYYY') %>
+                </div>
+                <div class="text-sm text-text-muted">Member Since</div>
+            </div>
+
+            <div>
+                <div class="text-xl font-semibold text-primary-light">
+                    <%= moment(user.lastLogin).fromNow() %>
+                </div>
+                <div class="text-sm text-text-muted">Last Login</div>
+            </div>
+
+            <div>
+                <div class="text-2xl font-bold text-primary-light">
+                    <%= user.loginAttempts || 0 %>
+                </div>
+                <div class="text-sm text-text-muted">Login Attempts</div>
+            </div>
+
+            <div>
+                <div class="text-xl font-semibold text-primary-light">
+                    <%= user.isAdmin ? 'Admin' : 'User' %>
+                </div>
+                <div class="text-sm text-text-muted">Account Type</div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<%- include('../partials/footer') %>

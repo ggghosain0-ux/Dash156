@@ -1,0 +1,57 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title"><%= title %></h3>
+        <a href="/admin/coupons" class="btn btn-outline">Back to Coupons</a>
+    </div>
+    <div style="padding: 1.5rem;">
+        <form action="<%= coupon.id ? '/admin/coupons/' + coupon.id : '/admin/coupons' %>" method="POST">
+            
+            <div class="form-group">
+                <label class="form-label">Coupon Code</label>
+                <input type="text" name="code" value="<%= coupon.code || '' %>" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Coupon Type</label>
+                <select name="couponType" class="form-control" required>
+                    <% couponTypes.forEach(type => { %>
+                    <option value="<%= type %>" <%= coupon.couponType === type ? 'selected' : '' %>>
+                        <%= type.charAt(0).toUpperCase() + type.slice(1) %>
+                    </option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Value <%= coupon.couponType === 'percent' ? '(Percentage)' : '(Fixed Amount)' %>
+                </label>
+                <input type="number" step="0.01" name="value" value="<%= coupon.value || '' %>" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Maximum Uses (Leave empty for unlimited)</label>
+                <input type="number" name="maxUses" value="<%= coupon.maxUses || '' %>" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Expiration Date</label>
+                <input type="date" name="expiresAt" value="<%= coupon.expiresAt ? moment(coupon.expiresAt).format('YYYY-MM-DD') : '' %>" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="isActive" <%= coupon.isActive ? 'checked' : '' %>> Active Coupon
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <%= coupon.id ? 'Update Coupon' : 'Create Coupon' %>
+            </button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

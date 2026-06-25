@@ -1,0 +1,192 @@
+<%- include('../partials/header') %>
+
+<div class="page-header fade-in-up">
+    <h1 class="page-title">
+        <% if (currentCategory && currentCategory !== 'all' && category && category.name) { %>
+            <%= category.name %>
+        <% } else { %>
+            All Products
+        <% } %>
+    </h1>
+
+    <p class="page-subtitle">
+        <% if (currentCategory && currentCategory !== 'all' && category && category.name) { %>
+            Explore our <%= category.name ? category.name.toLowerCase() : '' %> hosting solutions
+        <% } else { %>
+            Discover our complete range of hosting services
+        <% } %>
+    </p>
+</div>
+
+<!-- Search and Filter Section -->
+<section class="search-section slide-in-left">
+    <form action="/products" method="GET" class="search-form">
+        <input type="text" name="search" class="search-input" placeholder="Search products..." value="<%= search %>">
+        
+        <select name="category" class="form-select">
+            <option value="all">All Categories</option>
+            <% categories.forEach(cat => { %>
+                <option value="<%= cat.slug %>" <%= currentCategory === cat.slug ? 'selected' : '' %>>
+                    <%= cat.name %>
+                </option>
+            <% }); %>
+        </select>
+        
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        
+        <% if (search || (currentCategory && currentCategory !== 'all')) { %>
+            <a href="/products" class="btn btn-outline">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        <% } %>
+    </form>
+</section>
+
+<!-- Categories Quick Navigation -->
+<section class="mb-3">
+    <div class="categories-grid">
+
+        <!-- All Products -->
+        <a href="/products" class="category-card text-center <%= currentCategory === 'all' ? 'active' : '' %>"
+           style="text-decoration: none;">
+            <i class="fas fa-th-large" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h3 class="category-title">All Products</h3>
+            <p class="category-description">Browse all hosting solutions</p>
+        </a>
+        
+        <!-- Dynamic Categories -->
+        <% categories.forEach(cat => { %>
+            <a href="/products?category=<%= cat.slug %>" 
+               class="category-card text-center <%= currentCategory === cat.slug ? 'active' : '' %>"
+               style="text-decoration: none;">
+
+                <img src="<%= cat.image %>" 
+                     alt="<%= cat.name %>" 
+                     class="category-image"
+                     onerror="this.src='/images/default-category.png'">
+
+                <h3 class="category-title"><%= cat.name %></h3>
+                <p class="category-description">Specialized hosting solutions</p>
+            </a>
+        <% }); %>
+    </div>
+</section>
+
+<!-- Products Grid -->
+<section class="mb-3">
+    <% if (products && products.length > 0) { %>
+
+        <div class="products-grid">
+            <% products.forEach(product => { %>
+                <div class="product-card fade-in-up">
+
+                    <img src="<%= product.image %>" 
+                         alt="<%= product.name %>" 
+                         class="product-image"
+                         onerror="this.src='/images/default-product.png'">
+
+                    <div class="product-meta">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <span><%= product.averageRating || '0.0' %></span>
+                        </div>
+                        <span class="review-count">(<%= product.reviewCount || 0 %> reviews)</span>
+                    </div>
+
+                    <h3 class="product-title"><%= product.name %></h3>
+
+                    <p class="product-description">
+                        <%= product.description ? product.description.substring(0, 120) : '' %>...
+                    </p>
+
+                    <div class="product-specs">
+                        <div class="spec-item">
+                            <i class="fas fa-microchip"></i>
+                            <span><%= product.specs?.cpu || 'N/A' %>v Core</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-memory"></i>
+                            <span><%= product.specs?.ram || 'N/A' %> RAM</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-hdd"></i>
+                            <span><%= product.specs?.disk || 'N/A' %> DISK</span>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-network-wired"></i>
+                            <span><%= product.specs?.bandwidth || 'N/A' %> Bandwith</span>
+                        </div>
+                    </div>
+
+                    <div class="product-price">
+                        ₹<%= product.priceMonthly %>/mo
+                    </div>
+
+                    <div class="flex justify-between items-center gap-2">
+                        <a href="/products/<%= product.id %>" class="btn btn-primary flex-1 text-center">
+                            <i class="fas fa-info-circle"></i> Details
+                        </a>
+
+                        <% if (isLoggedIn) { %>
+                            <form action="/orders" method="POST" class="flex-1">
+                                <input type="hidden" name="productId" value="<%= product.id %>">
+                                <input type="hidden" name="billingCycle" value="monthly">
+                                <button type="submit" class="btn btn-outline w-full">
+                                    <i class="fas fa-shopping-cart"></i> Order
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/login" class="btn btn-outline flex-1 text-center">
+                                <i class="fas fa-shopping-cart"></i> Order
+                            </a>
+                        <% } %>
+                    </div>
+
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="flex justify-center items-center gap-2 mt-3">
+
+                <% if (pagination.hasPrev) { %>
+                    <a href="?page=<%= pagination.page - 1 %><%= search ? '&search=' + search : '' %><%= currentCategory !== 'all' ? '&category=' + currentCategory : '' %>" 
+                       class="btn btn-outline">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                <% } %>
+
+                <span class="text-text-secondary px-3">
+                    Page <%= pagination.page %> of <%= pagination.totalPages %>
+                </span>
+
+                <% if (pagination.hasNext) { %>
+                    <a href="?page=<%= pagination.page + 1 %><%= search ? '&search=' + search : '' %><%= currentCategory !== 'all' ? '&category=' + currentCategory : '' %>" 
+                       class="btn btn-outline">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                <% } %>
+
+            </div>
+        <% } %>
+
+    <% } else { %>
+
+        <div class="text-center p-3">
+            <i class="fas fa-search" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">No products found</h3>
+            <p class="text-text-secondary">
+                Try adjusting your search criteria or browse all categories.
+            </p>
+            <a href="/products" class="btn btn-primary mt-2">
+                <i class="fas fa-th-large"></i> Browse All Products
+            </a>
+        </div>
+
+    <% } %>
+</section>
+
+<%- include('../partials/footer') %>

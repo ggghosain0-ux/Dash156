@@ -1,0 +1,125 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">
+            Support Tickets 
+            <% if (unreadCount > 0) { %>
+                <span class="badge badge-danger"><%= unreadCount %> unread</span>
+            <% } %>
+        </h3>
+        <div class="header-actions">
+            <a href="/admin/tickets/stats" class="btn btn-outline">
+                <i class="fas fa-chart-bar"></i> Stats
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div style="padding: 1rem; border-bottom: 1px solid var(--border);">
+        <form method="GET" class="form-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <select name="status" class="form-control">
+                <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
+                <% TICKET_CONFIG.STATUSES.forEach(status => { %>
+                <option value="<%= status %>" <%= filters.status === status ? 'selected' : '' %>>
+                    <%= status.charAt(0).toUpperCase() + status.slice(1) %>
+                </option>
+                <% }) %>
+            </select>
+            
+            <select name="department" class="form-control">
+                <option value="all" <%= filters.department === 'all' ? 'selected' : '' %>>All Departments</option>
+                <% TICKET_CONFIG.DEPARTMENTS.forEach(dept => { %>
+                <option value="<%= dept %>" <%= filters.department === dept ? 'selected' : '' %>>
+                    <%= dept.charAt(0).toUpperCase() + dept.slice(1) %>
+                </option>
+                <% }) %>
+            </select>
+            
+            <select name="priority" class="form-control">
+                <option value="all" <%= filters.priority === 'all' ? 'selected' : '' %>>All Priorities</option>
+                <% TICKET_CONFIG.PRIORITIES.forEach(priority => { %>
+                <option value="<%= priority %>" <%= filters.priority === priority ? 'selected' : '' %>>
+                    <%= priority.charAt(0).toUpperCase() + priority.slice(1) %>
+                </option>
+                <% }) %>
+            </select>
+            
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Subject</th>
+                    <th>User</th>
+                    <th>Department</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% tickets.forEach(ticket => { %>
+                <tr>
+                    <td>#<%= ticket.id %></td>
+                    <td><%= ticket.subject %></td>
+                    <td><%= ticket.userId.slice(0, 8) %></td>
+                    <td>
+                        <span class="badge badge-info">
+                            <%= ticket.department %>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-<%= 
+                            ticket.priority === 'critical' ? 'danger' : 
+                            ticket.priority === 'high' ? 'warning' : 'secondary'
+                        %>">
+                            <%= ticket.priority %>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-<%= 
+                            ticket.status === 'open' ? 'success' : 
+                            ticket.status === 'in_progress' ? 'warning' : 'secondary'
+                        %>">
+                            <%= ticket.status %>
+                        </span>
+                    </td>
+                    <td><%= moment(ticket.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <a href="/admin/tickets/<%= ticket.id %>" class="btn btn-outline btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>&<%= new URLSearchParams(filters).toString() %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>&<%= new URLSearchParams(filters).toString() %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>&<%= new URLSearchParams(filters).toString() %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

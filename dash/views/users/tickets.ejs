@@ -1,0 +1,196 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up">
+    <div class="page-header">
+        <h1 class="page-title">Support Tickets</h1>
+        <p class="page-subtitle">Get help with your hosting services and account</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-3">
+        <a href="/tickets/new" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Ticket
+        </a>
+
+        <!-- Filters -->
+        <form action="/tickets" method="GET" class="flex flex-col lg:flex-row gap-2">
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
+                <option value="open" <%= filters.status === 'open' ? 'selected' : '' %>>Open</option>
+                <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+                <option value="on_hold" <%= filters.status === 'on_hold' ? 'selected' : '' %>>On Hold</option>
+                <option value="resolved" <%= filters.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+                <option value="closed" <%= filters.status === 'closed' ? 'selected' : '' %>>Closed</option>
+            </select>
+
+            <select name="department" class="form-select" onchange="this.form.submit()">
+                <option value="all" <%= filters.department === 'all' ? 'selected' : '' %>>All Departments</option>
+                <% TICKET_CONFIG.DEPARTMENTS.forEach(dept => { %>
+                    <option value="<%= dept %>" <%= filters.department === dept ? 'selected' : '' %>>
+                        <%= dept.charAt(0).toUpperCase() + dept.slice(1) %>
+                    </option>
+                <% }); %>
+            </select>
+
+            <select name="priority" class="form-select" onchange="this.form.submit()">
+                <option value="all" <%= filters.priority === 'all' ? 'selected' : '' %>>All Priorities</option>
+                <% TICKET_CONFIG.PRIORITIES.forEach(priority => { %>
+                    <option value="<%= priority %>" <%= filters.priority === priority ? 'selected' : '' %>>
+                        <%= priority.charAt(0).toUpperCase() + priority.slice(1) %>
+                    </option>
+                <% }); %>
+            </select>
+
+            <% if (filters.status !== 'all' || filters.department !== 'all' || filters.priority !== 'all' || filters.search) { %>
+                <a href="/tickets" class="btn btn-outline">Clear Filters</a>
+            <% } %>
+        </form>
+    </div>
+
+    <!-- Search -->
+    <form action="/tickets" method="GET" class="search-section">
+        <div class="search-form">
+            <input type="text" name="search" class="search-input" placeholder="Search tickets..." value="<%= filters.search %>">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </form>
+
+    <% if (tickets && tickets.length > 0) { %>
+        <div class="space-y-3">
+            <% tickets.forEach(ticket => { %>
+                <div class="category-card">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="product-title" style="margin: 0;">
+                                    <a href="/tickets/<%= ticket.id %>" class="text-text-primary hover:text-primary-light">
+                                        <%= ticket.subject %>
+                                    </a>
+                                </h3>
+                                
+                                <% if (!ticket.isReadUser) { %>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-primary text-white">
+                                        New
+                                    </span>
+                                <% } %>
+                            </div>
+
+                            <p class="text-text-secondary mb-2">
+                                <%= ticket.description || 'No description provided.' %>
+                            </p>
+
+                            <div class="flex flex-wrap gap-2 text-sm">
+                                <span class="px-2 py-1 rounded-full" style="
+                                    background: <%= 
+                                        ticket.status === 'open' ? 'var(--success)' : 
+                                        ticket.status === 'in_progress' ? 'var(--info)' : 
+                                        ticket.status === 'on_hold' ? 'var(--warning)' : 
+                                        ticket.status === 'resolved' ? 'var(--primary)' : 'var(--secondary)'
+                                    %>20; 
+                                    color: <%= 
+                                        ticket.status === 'open' ? 'var(--success)' : 
+                                        ticket.status === 'in_progress' ? 'var(--info)' : 
+                                        ticket.status === 'on_hold' ? 'var(--warning)' : 
+                                        ticket.status === 'resolved' ? 'var(--primary)' : 'var(--secondary)'
+                                    %>;
+                                ">
+                                    <i class="fas fa-<%= 
+                                        ticket.status === 'open' ? 'clock' : 
+                                        ticket.status === 'in_progress' ? 'sync' : 
+                                        ticket.status === 'on_hold' ? 'pause' : 
+                                        ticket.status === 'resolved' ? 'check' : 'times'
+                                    %>"></i>
+                                    <%= ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1).replace('_', ' ') %>
+                                </span>
+
+                                <span class="px-2 py-1 rounded-full" style="background: var(--bg-tertiary); color: var(--text-muted);">
+                                    <i class="fas fa-<%= getDepartmentIcon(ticket.department) %>"></i>
+                                    <%= ticket.department.charAt(0).toUpperCase() + ticket.department.slice(1) %>
+                                </span>
+
+                                <span class="px-2 py-1 rounded-full" style="
+                                    background: <%= 
+                                        ticket.priority === 'critical' ? 'var(--danger)' : 
+                                        ticket.priority === 'high' ? 'var(--warning)' : 
+                                        ticket.priority === 'medium' ? 'var(--info)' : 'var(--success)'
+                                    %>20; 
+                                    color: <%= 
+                                        ticket.priority === 'critical' ? 'var(--danger)' : 
+                                        ticket.priority === 'high' ? 'var(--warning)' : 
+                                        ticket.priority === 'medium' ? 'var(--info)' : 'var(--success)'
+                                    %>;
+                                ">
+                                    <i class="fas fa-<%= 
+                                        ticket.priority === 'critical' ? 'exclamation-triangle' : 
+                                        ticket.priority === 'high' ? 'exclamation-circle' : 'flag'
+                                    %>"></i>
+                                    <%= ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) %>
+                                </span>
+
+                                <% if (ticket.tags) { %>
+                                    <% ticket.tags.split(',').forEach(tag => { %>
+                                        <span class="px-2 py-1 rounded-full" style="background: var(--bg-tertiary); color: var(--text-muted);">
+                                            #<%= tag %>
+                                        </span>
+                                    <% }); %>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-text-secondary text-sm mb-2">
+                                <%= moment(ticket.updatedAt).fromNow() %>
+                            </div>
+                            <a href="/tickets/<%= ticket.id %>" class="btn btn-outline btn-sm">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="flex justify-center items-center gap-2 mt-3">
+                <% if (pagination.hasPrev) { %>
+                    <a href="?page=<%= pagination.page - 1 %><%= filters.status !== 'all' ? '&status=' + filters.status : '' %><%= filters.department !== 'all' ? '&department=' + filters.department : '' %><%= filters.priority !== 'all' ? '&priority=' + filters.priority : '' %><%= filters.search ? '&search=' + filters.search : '' %>" 
+                       class="btn btn-outline">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                <% } %>
+                
+                <span class="text-text-secondary px-3">
+                    Page <%= pagination.page %> of <%= pagination.totalPages %>
+                </span>
+                
+                <% if (pagination.hasNext) { %>
+                    <a href="?page=<%= pagination.page + 1 %><%= filters.status !== 'all' ? '&status=' + filters.status : '' %><%= filters.department !== 'all' ? '&department=' + filters.department : '' %><%= filters.priority !== 'all' ? '&priority=' + filters.priority : '' %><%= filters.search ? '&search=' + filters.search : '' %>" 
+                       class="btn btn-outline">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+
+    <% } else { %>
+        <div class="category-card text-center p-3">
+            <i class="fas fa-headset" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">No Tickets Found</h3>
+            <p class="text-text-secondary mb-3">
+                <% if (filters.status !== 'all' || filters.department !== 'all' || filters.priority !== 'all' || filters.search) { %>
+                    No tickets match your current filters. Try adjusting your search criteria.
+                <% } else { %>
+                    You haven't created any support tickets yet.
+                <% } %>
+            </p>
+            <a href="/tickets/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Your First Ticket
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

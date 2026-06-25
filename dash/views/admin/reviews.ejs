@@ -1,0 +1,88 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Product Reviews</h3>
+        <div class="header-actions">
+            <select class="form-control" onchange="window.location.href='/admin/reviews?approved=' + this.value" style="width: auto;">
+                <option value="all" <%= currentFilter === 'all' ? 'selected' : '' %>>All Reviews</option>
+                <option value="true" <%= currentFilter === 'true' ? 'selected' : '' %>>Approved</option>
+                <option value="false" <%= currentFilter === 'false' ? 'selected' : '' %>>Pending</option>
+            </select>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>User</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% reviews.forEach(review => { %>
+                <tr>
+                    <td><%= review.productName %></td>
+                    <td><%= review.firstName %> <%= review.lastName %></td>
+                    <td>
+                        <div style="color: #f59e0b;">
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <i class="fas fa-star<%= i > review.rating ? '-half-alt' : '' %>"></i>
+                            <% } %>
+                            (<%= review.rating %>)
+                        </div>
+                    </td>
+                    <td><%= review.comment ? review.comment.substring(0, 50) + '...' : 'No comment' %></td>
+                    <td>
+                        <span class="badge <%= review.isApproved ? 'badge-success' : 'badge-warning' %>">
+                            <%= review.isApproved ? 'Approved' : 'Pending' %>
+                        </span>
+                    </td>
+                    <td><%= moment(review.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <% if (!review.isApproved) { %>
+                        <form action="/admin/reviews/<%= review.id %>/approve" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                        <% } %>
+                        <form action="/admin/reviews/<%= review.id %>/delete" method="POST" style="display: inline;"
+                              onsubmit="return confirmDelete('Delete this review?')">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>&approved=<%= currentFilter %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>&approved=<%= currentFilter %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>&approved=<%= currentFilter %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

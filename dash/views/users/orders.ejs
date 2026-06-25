@@ -1,0 +1,112 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up">
+    <div class="page-header">
+        <h1 class="page-title">My Orders</h1>
+        <p class="page-subtitle">Manage your hosting services and subscriptions</p>
+    </div>
+
+    <% if (orders && orders.length > 0) { %>
+        <div class="space-y-3">
+            <% orders.forEach(order => { %>
+                <div class="category-card">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="product-title" style="margin: 0;"><%= order.productName %></h3>
+                                <span class="text-xs px-2 py-1 rounded-full" style="
+                                    background: <%= 
+                                        order.status === 'active' ? 'var(--success)' : 
+                                        order.status === 'pending' ? 'var(--warning)' : 
+                                        order.status === 'cancelled' ? 'var(--danger)' : 
+                                        order.status === 'paid' ? 'var(--info)' : 'var(--secondary)'
+                                    %>20; 
+                                    color: <%= 
+                                        order.status === 'active' ? 'var(--success)' : 
+                                        order.status === 'pending' ? 'var(--warning)' : 
+                                        order.status === 'cancelled' ? 'var(--danger)' : 
+                                        order.status === 'paid' ? 'var(--info)' : 'var(--secondary)'
+                                    %>;
+                                ">
+                                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                    <strong class="text-text-muted">Order ID:</strong>
+                                    <div>#<%= order.id %></div>
+                                </div>
+                                <div>
+                                    <strong class="text-text-muted">Billing Cycle:</strong>
+                                    <div class="capitalize"><%= order.billingCycle %></div>
+                                </div>
+                                <div>
+                                    <strong class="text-text-muted">Amount:</strong>
+                                    <div>₹<%= order.price %></div>
+                                </div>
+                                <div>
+                                    <strong class="text-text-muted">Order Date:</strong>
+                                    <div><%= moment(order.createdAt).format('MMM D, YYYY') %></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a href="/orders/<%= order.id %>" class="btn btn-outline btn-sm">
+                                <i class="fas fa-eye"></i> Details
+                            </a>
+                            
+                            <% if (order.status === 'active') { %>
+                                <a href="/orders/<%= order.id %>/invoice" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-file-invoice"></i> Invoice
+                                </a>
+                            <% } %>
+                            
+                            <% if (order.status === 'pending') { %>
+                                <form action="/retry-payment/<%= order.id %>" method="POST" class="inline">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-credit-card"></i> Pay Now
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="flex justify-center items-center gap-2 mt-3">
+                <% if (pagination.hasPrev) { %>
+                    <a href="?page=<%= pagination.page - 1 %>" class="btn btn-outline">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                <% } %>
+                
+                <span class="text-text-secondary px-3">
+                    Page <%= pagination.page %> of <%= pagination.totalPages %>
+                </span>
+                
+                <% if (pagination.hasNext) { %>
+                    <a href="?page=<%= pagination.page + 1 %>" class="btn btn-outline">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+
+    <% } else { %>
+        <div class="category-card text-center p-3">
+            <i class="fas fa-shopping-bag" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--text-secondary); margin-bottom: 1rem;">No Orders Yet</h3>
+            <p class="text-text-secondary mb-3">You haven't placed any orders yet. Start by exploring our hosting products.</p>
+            <a href="/products" class="btn btn-primary">
+                <i class="fas fa-rocket"></i> Browse Products
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

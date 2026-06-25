@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Admin Panel</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="shortcut icon" href="<%= siteFavicon %>" type="image/x-icon">
+    <meta name="description" content="<%= siteDescription || 'Reliable Hosting' %>">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/admin/dashboard" class="nav-item <%= activePage === 'dashboard' ? 'active' : '' %>">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/admin/orders" class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a href="/admin/products" class="nav-item <%= activePage === 'products' ? 'active' : '' %>">
+                    <i class="fas fa-box"></i> Products
+                </a>
+                <a href="/admin/categories" class="nav-item <%= activePage === 'categories' ? 'active' : '' %>">
+                    <i class="fas fa-tags"></i> Categories
+                </a>
+                <a href="/admin/users" class="nav-item <%= activePage === 'users' ? 'active' : '' %>">
+                    <i class="fas fa-users"></i> Users
+                </a>
+                <a href="/admin/tickets" class="nav-item <%= activePage === 'tickets' ? 'active' : '' %>">
+                    <i class="fas fa-ticket-alt"></i> Tickets
+                </a>
+                <a href="/admin/reviews" class="nav-item <%= activePage === 'reviews' ? 'active' : '' %>">
+                    <i class="fas fa-star"></i> Reviews
+                </a>
+                <a href="/admin/coupons" class="nav-item <%= activePage === 'coupons' ? 'active' : '' %>">
+                    <i class="fas fa-percent"></i> Coupons
+                </a>
+                <a href="/admin/analytics" class="nav-item <%= activePage === 'analytics' ? 'active' : '' %>">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </a>
+                <a href="/admin/settings" class="nav-item <%= activePage === 'settings' ? 'active' : '' %>">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-arrow-left"></i> Back to Site
+                </a>
+                <a href="/logout" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Page Header -->
+            <header class="admin-header fade-in">
+                <div class="header-content">
+                    <div class="header-title">
+                        <h1><%= title %></h1>
+                        <p>Admin Panel - Manage your hosting service</p>
+                    </div>
+                    <div class="header-actions">
+                        <span class="user-info">
+                            <i class="fas fa-user-circle"></i> 
+                            <%= user.firstName %> <%= user.lastName %>
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            <% if (success && success.length > 0) { %>
+                <div class="alert alert-success fade-in">
+                    <i class="fas fa-check-circle"></i> <%= success[0] %>
+                </div>
+            <% } %>
+            
+            <% if (error && error.length > 0) { %>
+                <div class="alert alert-error fade-in">
+                    <i class="fas fa-exclamation-circle"></i> <%= error[0] %>
+                </div>
+            <% } %>

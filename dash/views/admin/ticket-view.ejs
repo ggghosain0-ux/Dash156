@@ -1,0 +1,283 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-content">
+    <!-- Flash Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success">
+            <%= success[0] %>
+        </div>
+    <% } %>
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger">
+            <%= error[0] %>
+        </div>
+    <% } %>
+
+    <div class="d-flex justify-between align-center mb-4">
+        <h1>Ticket #<%= ticket.id %></h1>
+        <a href="/admin/tickets" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Tickets
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-8">
+            <!-- Ticket Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><%= ticket.subject %></h2>
+                    <div class="d-flex gap-2">
+                        <span class="badge badge-<%= 
+                            ticket.priority === 'critical' ? 'danger' : 
+                            ticket.priority === 'high' ? 'warning' : 
+                            ticket.priority === 'medium' ? 'primary' : 'secondary'
+                        %>">
+                            <%= ticket.priority %>
+                        </span>
+                        <span class="badge badge-<%= 
+                            ticket.status === 'open' ? 'success' : 
+                            ticket.status === 'in_progress' ? 'primary' : 
+                            ticket.status === 'on_hold' ? 'warning' : 'secondary'
+                        %>">
+                            <%= ticket.status.replace('_', ' ') %>
+                        </span>
+                        <% if (slaStatus === 'breached') { %>
+                            <span class="badge badge-danger">SLA Breached</span>
+                        <% } else if (slaStatus === 'warning') { %>
+                            <span class="badge badge-warning">SLA Warning</span>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <strong>Department:</strong> 
+                            <span class="badge badge-secondary"><%= ticket.department %></span>
+                        </div>
+                        <div class="col-4">
+                            <strong>Created:</strong> <%= moment(ticket.createdAt).format('MMM D, YYYY HH:mm') %>
+                        </div>
+                        <div class="col-4">
+                            <strong>Last Updated:</strong> <%= moment(ticket.updatedAt).fromNow() %>
+                        </div>
+                    </div>
+                    
+                    <% if (ticket.tags && ticket.tags.length > 0) { %>
+                        <div class="mb-4">
+                            <strong>Tags:</strong>
+                            <% ticket.tags.forEach(tag => { %>
+                                <span class="badge badge-outline"><%= tag %></span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+
+                    <!-- Status and Assignment Controls -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <form action="/admin/tickets/<%= ticket.id %>/status" method="POST" class="d-flex gap-2">
+                                <select class="form-control" name="status" required>
+                                    <% TICKET_CONFIG.STATUSES.forEach(status => { %>
+                                        <option value="<%= status %>" <%= ticket.status === status ? 'selected' : '' %>>
+                                            <%= status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ') %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form action="/admin/tickets/<%= ticket.id %>/assign" method="POST" class="d-flex gap-2">
+                                <select class="form-control" name="assignTo">
+                                    <option value="">Unassigned</option>
+                                    <% admins.forEach(admin => { %>
+                                        <option value="<%= admin.id %>" <%= ticket.assignedTo === admin.id ? 'selected' : '' %>>
+                                            <%= admin.firstName %> <%= admin.lastName %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Replies -->
+                    <div class="ticket-replies">
+                        <% replies.forEach(reply => { %>
+                            <div class="reply <%= reply.isAdminReply ? 'admin-reply' : 'user-reply' %> mb-4 p-3" style="border-left: 4px solid <%= reply.isAdminReply ? '#6366f1' : '#10b981' %>; background: var(--hover-bg);">
+                                <div class="d-flex justify-between align-center mb-2">
+                                    <div>
+                                        <strong><%= reply.firstName %> <%= reply.lastName %></strong>
+                                        <% if (reply.isAdminReply) { %>
+                                            <span class="badge badge-primary ml-2">Staff</span>
+                                        <% } %>
+                                    </div>
+                                    <small class="text-muted"><%= moment(reply.createdAt).format('MMM D, YYYY HH:mm') %></small>
+                                </div>
+                                <div class="reply-message">
+                                    <%= reply.message.replace(/\n/g, '<br>') %>
+                                </div>
+                                <% if (reply.attachments && reply.attachments.length > 0) { %>
+                                    <div class="attachments mt-2">
+                                        <strong>Attachments:</strong>
+                                        <% reply.attachments.forEach(attachment => { %>
+                                            <div class="attachment">
+                                                <a href="<%= attachment.path %>" target="_blank" class="btn btn-outline btn-sm">
+                                                    <i class="fas fa-paperclip"></i> <%= attachment.name %>
+                                                </a>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Add Reply</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="/admin/tickets/<%= ticket.id %>/reply" method="POST" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label class="form-label">Message</label>
+                                    <textarea class="form-control" name="message" rows="4" required placeholder="Type your reply here..."></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Canned Responses</label>
+                                    <select class="form-control" onchange="if(this.value) { document.querySelector('[name=message]').value = this.value; this.value=''; }">
+                                        <option value="">Select a canned response...</option>
+                                        <% cannedResponses.forEach(response => { %>
+                                            <option value="<%= response.content %>"><%= response.name %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Attachments (Max 5 files, 10MB each)</label>
+                                    <input type="file" class="form-control" name="attachments" multiple accept="image/*,.pdf,.txt">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <input type="checkbox" name="isNote"> Add as internal note (customer won't see this)
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Send Reply</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <!-- Ticket Notes -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Internal Notes</h2>
+                </div>
+                <div class="card-body">
+                    <% if (notes.length > 0) { %>
+                        <% notes.forEach(note => { %>
+                            <div class="note mb-3 p-2" style="background: var(--dark); border-radius: 4px;">
+                                <div class="d-flex justify-between align-center mb-1">
+                                    <strong><%= note.firstName %> <%= note.lastName %></strong>
+                                    <small class="text-muted"><%= moment(note.createdAt).format('MMM D HH:mm') %></small>
+                                </div>
+                                <div class="note-message">
+                                    <%= note.message %>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted">No internal notes yet.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Ticket Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <% if (ticket.status !== 'closed') { %>
+                            <form action="/admin/tickets/<%= ticket.id %>/status" method="POST">
+                                <input type="hidden" name="status" value="closed">
+                                <button type="submit" class="btn btn-danger btn-block">Close Ticket</button>
+                            </form>
+                        <% } %>
+                        
+                        <form action="/admin/tickets/<%= ticket.id %>/delete" method="POST">
+                            <button type="submit" class="btn btn-outline btn-block" onclick="return confirm('Are you sure you want to delete this ticket? This action cannot be undone.')">
+                                Delete Ticket
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLA Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2>SLA Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="mb-3">
+                            <strong>Priority:</strong> 
+                            <span class="badge badge-<%= 
+                                ticket.priority === 'critical' ? 'danger' : 
+                                ticket.priority === 'high' ? 'warning' : 
+                                ticket.priority === 'medium' ? 'primary' : 'secondary'
+                            %>">
+                                <%= ticket.priority %>
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>SLA Due:</strong>
+                            <br>
+                            <%= ticket.slaDue ? moment(ticket.slaDue).format('MMM D, YYYY HH:mm') : 'Not set' %>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>SLA Status:</strong>
+                            <br>
+                            <span class="badge badge-<%= 
+                                slaStatus === 'breached' ? 'danger' : 
+                                slaStatus === 'warning' ? 'warning' : 'success'
+                            %>">
+                                <%= slaStatus.toUpperCase() %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.reply {
+    border-radius: 4px;
+}
+.admin-reply {
+    background: rgba(99, 102, 241, 0.1);
+}
+.user-reply {
+    background: rgba(16, 185, 129, 0.1);
+}
+.attachment {
+    margin: 2px 0;
+}
+.note {
+    font-size: 0.875rem;
+}
+</style>
+
+<%- include('../partials/admin-footer') %>

@@ -1,0 +1,133 @@
+<%- include('../partials/header') %>
+
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-folder"></i> <%= category.name %>
+        </h1>
+        <a href="/products" class="btn btn-outline btn-sm">
+            <i class="fas fa-arrow-left"></i> All Categories
+        </a>
+    </div>
+
+    <% if (category.description) { %>
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+            <p class="text-secondary" style="font-size: 1.1rem; line-height: 1.6;">
+                <%= category.description %>
+            </p>
+        </div>
+    <% } %>
+
+    <% if (products && products.length > 0) { %>
+        <div class="product-grid" style="padding: 1.5rem;">
+            <% products.forEach(product => { %>
+                <div class="product-card">
+                    <% if (product.image) { %>
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                    <% } else { %>
+                        <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-server" style="font-size: 3rem; color: var(--text-muted);"></i>
+                        </div>
+                    <% } %>
+                    <div class="product-content">
+                        <h3 class="product-title"><%= product.name %></h3>
+                        <p class="product-description"><%= product.description.substring(0, 120) %>...</p>
+                        
+                        <div class="mb-2">
+                            <% if (product.specs && product.specs.cpu) { %>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                    <i class="fas fa-microchip" style="color: var(--text-muted); font-size: 0.875rem;"></i>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);"><%= product.specs.cpu %></span>
+                                </div>
+                            <% } %>
+                            <% if (product.specs && product.specs.ram) { %>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                    <i class="fas fa-memory" style="color: var(--text-muted); font-size: 0.875rem;"></i>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);"><%= product.specs.ram %></span>
+                                </div>
+                            <% } %>
+                            <% if (product.specs && product.specs.disk) { %>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-hdd" style="color: var(--text-muted); font-size: 0.875rem;"></i>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);"><%= product.specs.disk %></span>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="product-price mb-2">
+                            ₹<%= product.priceMonthly %>/mo
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="/products/<%= product.id %>" class="btn btn-primary" style="flex: 1;">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="text-center mt-3" style="padding: 0 1.5rem 1.5rem;">
+                <div style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                    <% if (pagination.page > 1) { %>
+                        <a href="?page=<%= pagination.page - 1 %>" class="btn btn-outline btn-sm">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    <% } %>
+                    
+                    <span class="text-secondary">
+                        Page <%= pagination.page %> of <%= pagination.totalPages %>
+                    </span>
+                    
+                    <% if (pagination.page < pagination.totalPages) { %>
+                        <a href="?page=<%= pagination.page + 1 %>" class="btn btn-outline btn-sm">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    <% } else { %>
+        <div class="text-center p-4">
+            <i class="fas fa-folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+            <h3>No Products Available</h3>
+            <p class="text-secondary">There are no products in this category at the moment.</p>
+            <a href="/products" class="btn btn-primary mt-2">Browse All Products</a>
+        </div>
+    <% } %>
+</div>
+
+<!-- Category Description -->
+<% if (category.description && category.description.length > 200) { %>
+    <div class="card mt-3">
+        <h2 class="mb-2">About <%= category.name %></h2>
+        <div style="line-height: 1.7; color: var(--text-secondary);">
+            <%= category.description %>
+        </div>
+    </div>
+<% } %>
+
+<!-- Related Categories -->
+<% if (categories && categories.length > 0) { %>
+    <div class="card mt-3">
+        <h2 class="mb-2">Other Categories</h2>
+        <div class="category-grid">
+            <% categories.forEach(cat => { %>
+                <% if (cat.slug !== category.slug) { %>
+                    <a href="/c/<%= cat.slug %>" class="category-card">
+                        <div class="category-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <h3 class="category-name"><%= cat.name %></h3>
+                        <span class="category-count"><%= cat.count %> products</span>
+                    </a>
+                <% } %>
+            <% }); %>
+        </div>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>

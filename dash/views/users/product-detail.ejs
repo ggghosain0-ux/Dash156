@@ -1,0 +1,217 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up">
+    <!-- Breadcrumb -->
+    <nav class="mb-3" style="color: var(--text-secondary);">
+        <a href="/view" class="text-text-secondary">Home</a>
+        <span class="mx-2">/</span>
+        <a href="/products" class="text-text-secondary">Products</a>
+        <span class="mx-2">/</span>
+        <a href="/c/<%= product.categorySlug %>" class="text-text-secondary"><%= product.category %></a>
+        <span class="mx-2">/</span>
+        <span class="text-text-primary"><%= product.name %></span>
+    </nav>
+
+    <div class="product-detail">
+        <!-- Product Gallery -->
+        <div class="product-gallery">
+            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-main-image"
+                 onerror="this.src='/images/default-product.png'">
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+            <div class="product-meta">
+                <div class="rating">
+                    <i class="fas fa-star"></i>
+                    <span><%= product.averageRating %></span>
+                </div>
+                <span class="review-count">(<%= product.reviewCount %> reviews)</span>
+                <span class="text-text-muted">•</span>
+                <span class="text-success">
+                    <i class="fas fa-check-circle"></i> In Stock
+                </span>
+            </div>
+
+            <h1 class="page-title" style="font-size: 2.5rem; text-align: left; background: none; -webkit-text-fill-color: var(--text-primary);">
+                <%= product.name %>
+            </h1>
+
+            <p class="product-description" style="font-size: 1.2rem; line-height: 1.8;">
+                <%= product.description %>
+            </p>
+
+            <!-- Pricing -->
+            <div class="p-2" style="background: var(--bg-secondary); border-radius: 1rem;">
+                <h3 style="margin-bottom: 1rem;">Pricing Options</h3>
+                <div class="grid gap-2">
+                    <div class="flex justify-between items-center">
+                        <span>Monthly</span>
+                        <strong class="text-primary-light">₹<%= product.priceMonthly %></strong>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Quarterly</span>
+                        <strong class="text-primary-light">₹<%= product.priceQuarterly %></strong>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Yearly</span>
+                        <strong class="text-primary-light">₹<%= product.priceYearly %></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Form -->
+            <% if (isLoggedIn) { %>
+                <form action="/orders" method="POST" class="p-2" style="background: var(--bg-secondary); border-radius: 1rem;">
+                    <h3 style="margin-bottom: 1rem;">Order Now</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Billing Cycle</label>
+                        <select name="billingCycle" class="form-select" required>
+                            <option value="monthly">Monthly - ₹<%= product.priceMonthly %></option>
+                            <option value="quarterly">Quarterly - ₹<%= product.priceQuarterly %></option>
+                            <option value="yearly">Yearly - ₹<%= product.priceYearly %></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Coupon Code (Optional)</label>
+                        <input type="text" name="couponCode" class="form-input" placeholder="Enter coupon code">
+                    </div>
+
+                    <input type="hidden" name="productId" value="<%= product.id %>">
+                    
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-shopping-cart"></i> Order Now
+                    </button>
+                </form>
+            <% } else { %>
+                <div class="p-2 text-center" style="background: var(--bg-secondary); border-radius: 1rem;">
+                    <p class="text-text-secondary mb-2">Please login to order this product</p>
+                    <a href="/login" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login to Order
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Specifications -->
+    <section class="mb-3">
+        <h2 style="font-size: 2rem; margin-bottom: 2rem;">Specifications</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <h3 class="category-title"><i class="fas fa-microchip"></i> Processor</h3>
+                <p class="category-description"><%= product.specs.cpu %>v Core</p>
+            </div>
+            <div class="category-card">
+                <h3 class="category-title"><i class="fas fa-memory"></i> Memory</h3>
+                <p class="category-description"><%= product.specs.ram %> RAM</p>
+            </div>
+            <div class="category-card">
+                <h3 class="category-title"><i class="fas fa-hdd"></i> Storage</h3>
+                <p class="category-description"><%= product.specs.disk %> DISK</p>
+            </div>
+            <div class="category-card">
+                <h3 class="category-title"><i class="fas fa-network-wired"></i> Bandwidth</h3>
+                <p class="category-description"><%= product.specs.bandwidth %> </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <% if (product.features && product.features.length > 0) { %>
+        <section class="mb-3">
+            <h2 style="font-size: 2rem; margin-bottom: 2rem;">Features</h2>
+            <div class="categories-grid">
+                <% product.features.forEach(feature => { %>
+                    <div class="category-card text-center">
+                        <i class="fas fa-check-circle" style="color: var(--success); font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <h3 class="category-title" style="font-size: 1.2rem;"><%= feature %></h3>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+    <% } %>
+
+    <!-- Reviews -->
+    <section class="mb-3">
+        <h2 style="font-size: 2rem; margin-bottom: 2rem;">Customer Reviews</h2>
+        
+        <% if (reviews && reviews.length > 0) { %>
+            <div class="categories-grid">
+                <% reviews.forEach(review => { %>
+                    <div class="category-card">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <strong class="text-text-primary"><%= review.firstName %> <%= review.lastName %></strong>
+                                <div class="rating">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <i class="fas fa-star <%= i <= review.rating ? 'text-warning' : 'text-text-muted' %>"></i>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <span class="text-text-muted text-sm"><%= moment(review.createdAt).fromNow() %></span>
+                        </div>
+                        <p class="text-text-secondary"><%= review.comment %></p>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="text-center p-3">
+                <p class="text-text-secondary">No reviews yet. Be the first to review this product!</p>
+            </div>
+        <% } %>
+
+        <!-- Add Review Form -->
+        <% if (isLoggedIn) { %>
+            <div class="category-card mt-3">
+                <h3 style="margin-bottom: 1rem;">Add Your Review</h3>
+                <form action="/products/<%= product.id %>/review" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="5">★★★★★ - Excellent</option>
+                            <option value="4">★★★★☆ - Good</option>
+                            <option value="3">★★★☆☆ - Average</option>
+                            <option value="2">★★☆☆☆ - Poor</option>
+                            <option value="1">★☆☆☆☆ - Terrible</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Comment</label>
+                        <textarea name="comment" class="form-textarea" placeholder="Share your experience..." maxlength="1000"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        <% } %>
+    </section>
+
+    <!-- Related Products -->
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <section class="mb-3">
+            <h2 style="font-size: 2rem; margin-bottom: 2rem;">Related Products</h2>
+            <div class="products-grid">
+                <% relatedProducts.forEach(product => { %>
+                    <div class="product-card slide-in-left">
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image"
+                             onerror="this.src='/images/default-product.png'">
+                        <h3 class="product-title"><%= product.name %></h3>
+                        <p class="product-description"><%= product.description.substring(0, 80) %>...</p>
+                        <div class="product-price">₹<%= product.priceMonthly %>/mo</div>
+                        <a href="/products/<%= product.id %>" class="btn btn-primary w-full text-center">
+                            View Details
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        </section>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

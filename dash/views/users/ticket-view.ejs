@@ -1,0 +1,220 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up">
+
+    <!-- Breadcrumb -->
+    <nav class="mb-3 text-text-secondary">
+        <a href="/dashboard">Dashboard</a>
+        <span class="mx-2">/</span>
+        <a href="/tickets">Tickets</a>
+        <span class="mx-2">/</span>
+        <span class="text-text-primary">#<%= ticket.id %></span>
+    </nav>
+
+    <div class="category-card">
+
+        <!-- Ticket Header -->
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-3">
+            <div class="flex-1">
+
+                <h1 class="page-title text-left" style="font-size: 2rem;">
+                    <%= ticket.subject %>
+                </h1>
+
+                <!-- Labels -->
+                <div class="flex flex-wrap gap-2 mt-2">
+
+                    <!-- Status -->
+                    <% 
+                        const statusColors = {
+                            open: 'var(--success)',
+                            in_progress: 'var(--info)',
+                            on_hold: 'var(--warning)',
+                            resolved: 'var(--primary)',
+                            closed: 'var(--secondary)'
+                        };
+
+                        const statusIcons = {
+                            open: 'clock',
+                            in_progress: 'sync',
+                            on_hold: 'pause',
+                            resolved: 'check',
+                            closed: 'times'
+                        };
+
+                        const statusColor = statusColors[ticket.status] || 'var(--secondary)';
+                        const statusIcon = statusIcons[ticket.status] || 'times';
+                    %>
+
+                    <span class="px-2 py-1 rounded-full" style="background: <%= statusColor %>20; color: <%= statusColor %>;">
+                        <i class="fas fa-<%= statusIcon %>"></i>
+                        <%= ticket.status.replace('_', ' ').replace(/^./, c => c.toUpperCase()) %>
+                    </span>
+
+                    <!-- Department -->
+                    <% 
+                        const departmentMap = {
+                            billing: 'wallet',
+                            technical: 'cogs',
+                            sales: 'shopping-cart',
+                            general: 'info-circle'
+                        };
+                        const departmentIcon = departmentMap[ticket.department] || 'tags';
+                    %>
+
+                    <span class="px-2 py-1 rounded-full" style="background: var(--bg-tertiary); color: var(--text-muted);">
+                        <i class="fas fa-<%= departmentIcon %>"></i>
+                        <%= ticket.department.replace(/^./, c => c.toUpperCase()) %>
+                    </span>
+
+                    <!-- Priority -->
+                    <% 
+                        const priorityColors = {
+                            critical: 'var(--danger)',
+                            high: 'var(--warning)',
+                            medium: 'var(--info)',
+                            low: 'var(--success)'
+                        };
+
+                        const priorityIcons = {
+                            critical: 'exclamation-triangle',
+                            high: 'exclamation-circle',
+                            medium: 'flag',
+                            low: 'flag'
+                        };
+
+                        const priorityColor = priorityColors[ticket.priority] || 'var(--success)';
+                        const priorityIcon = priorityIcons[ticket.priority] || 'flag';
+                    %>
+
+                    <span class="px-2 py-1 rounded-full" style="background: <%= priorityColor %>20; color: <%= priorityColor %>;">
+                        <i class="fas fa-<%= priorityIcon %>"></i>
+                        <%= ticket.priority.replace(/^./, c => c.toUpperCase()) %>
+                    </span>
+
+                    <!-- SLA -->
+                    <% if (slaStatus === 'breached') { %>
+                        <span class="px-2 py-1 rounded-full bg-danger text-white">
+                            <i class="fas fa-exclamation-triangle"></i> SLA Breached
+                        </span>
+                    <% } else if (slaStatus === 'warning') { %>
+                        <span class="px-2 py-1 rounded-full bg-warning text-white">
+                            <i class="fas fa-clock"></i> SLA Warning
+                        </span>
+                    <% } %>
+
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-2">
+                <% if (ticket.status !== 'closed' && ticket.status !== 'resolved') { %>
+                    <form action="/tickets/<%= ticket.id %>/close" method="POST">
+                        <button type="submit" class="btn btn-outline"
+                            onclick="return confirm('Are you sure you want to close this ticket?')">
+                            <i class="fas fa-times"></i> Close Ticket
+                        </button>
+                    </form>
+                <% } %>
+
+                <a href="/tickets" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Tickets
+                </a>
+            </div>
+        </div>
+
+        <!-- Conversation -->
+        <div class="space-y-4">
+            <% replies.forEach(reply => { %>
+
+                <div class="p-3 rounded"
+                    style="background: <%= reply.isAdminReply ? 'var(--bg-tertiary)' : 'var(--bg-secondary)' %>;
+                           border-left: 4px solid <%= reply.isAdminReply ? 'var(--primary)' : 'var(--success)' %>;">
+
+                    <div class="flex justify-between items-start mb-2">
+                        <strong class="<%= reply.isAdminReply ? 'text-primary-light' : 'text-success' %>">
+                            <%= reply.firstName %> <%= reply.lastName %>
+                            <% if (reply.isAdminReply) { %>
+                                <span class="text-xs px-1 py-0.5 rounded bg-primary text-white ml-1">Staff</span>
+                            <% } %>
+                        </strong>
+
+                        <div class="text-xs text-text-muted">
+                            <%= moment(reply.createdAt).format('MMM D, YYYY [at] h:mm A') %>
+                        </div>
+                    </div>
+
+                    <!-- Message (Safe Rendering) -->
+                    <div class="prose prose-invert max-w-none">
+                        <%- reply.message.replace(/\n/g, '<br>') %>
+                    </div>
+
+                    <!-- Attachments -->
+                    <% if (reply.attachments?.length) { %>
+                        <div class="mt-2 pt-2 border-t border-border">
+                            <strong class="text-sm text-text-muted">Attachments:</strong>
+
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <% reply.attachments.forEach(a => { %>
+                                    <a href="<%= a.path %>" target="_blank" 
+                                       class="flex items-center gap-1 px-2 py-1 rounded text-sm"
+                                       style="background: var(--bg-primary); color: var(--text-secondary);">
+                                        <i class="fas fa-<%= 
+                                            a.type.includes('image') ? 'image' : 
+                                            a.type.includes('pdf') ? 'file-pdf' : 'file'
+                                        %>"></i>
+                                        <%= a.name %>
+                                    </a>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% } %>
+
+                </div>
+
+            <% }) %>
+        </div>
+
+        <!-- Reply Form -->
+        <% if (ticket.status !== 'closed' && ticket.status !== 'resolved') { %>
+
+            <div class="mt-3 p-3 rounded" style="background: var(--bg-tertiary);">
+                <h3 class="font-semibold mb-4 text-lg">Add Reply</h3>
+
+                <form action="/tickets/<%= ticket.id %>/reply" method="POST" enctype="multipart/form-data">
+
+                    <textarea name="message" class="form-textarea" 
+                        placeholder="Type your reply..." rows="5" required></textarea>
+
+                    <label class="form-label mt-3">Attachments</label>
+                    <input type="file" name="attachments" class="form-input"
+                        multiple accept=".jpg,.jpeg,.png,.pdf,.txt">
+
+                    <small class="text-text-muted">
+                        You can upload up to <%= TICKET_CONFIG.MAX_ATTACHMENTS %> files
+                    </small>
+
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fas fa-paper-plane"></i> Send Reply
+                    </button>
+                </form>
+            </div>
+
+        <% } else { %>
+
+            <div class="mt-3 p-3 rounded text-center" style="background: var(--bg-tertiary);">
+                <i class="fas fa-lock text-text-muted" style="font-size: 2rem;"></i>
+                <h3 class="text-text-secondary mt-2">This ticket is closed</h3>
+                <p class="text-text-muted">You cannot reply to closed tickets. Please create a new ticket if needed.</p>
+
+                <a href="/tickets/new" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus"></i> Create New Ticket
+                </a>
+            </div>
+
+        <% } %>
+
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

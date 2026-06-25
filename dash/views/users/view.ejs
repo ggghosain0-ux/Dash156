@@ -1,0 +1,1142 @@
+<%- include('../partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero-section fade-in-up">
+    <video class="hero-video" autoplay loop muted playsinline preload="metadata" poster="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1920">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-circuit-board-with-glowing-lines-41556-large.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Premium <span class="gradient-text">Cloud & VPS Hosting</span> Solutions</h1>
+        <p class="hero-subtitle">Enterprise-grade hosting with 99.9% uptime, blazing-fast performance, and 24/7 expert support. Scale your business with confidence.</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-number"><%= siteStats.totalProducts || 0 %>+</div>
+                <div class="stat-label">Hosting Plans</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><%= siteStats.totalOrders || 0 %>+</div>
+                <div class="stat-label">Active Services</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">99.9%</div>
+                <div class="stat-label">Uptime</div>
+            </div>
+        </div>
+        <div class="hero-actions">
+            <a href="#categories" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i> Explore Plans
+            </a>
+            <a href="#features" class="btn btn-outline btn-lg">
+                <i class="fas fa-play-circle"></i> How It Works
+            </a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="floating-server">
+            <i class="fas fa-server"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="search-section slide-in-left">
+    <div class="search-container">
+        <form action="/products" method="GET" class="search-form">
+            <div class="search-input-group">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" name="search" class="search-input" placeholder="Search for hosting plans, VPS, dedicated servers..." value="<%= search %>">
+                <button type="submit" class="btn btn-primary btn-search">
+                    Search Plans
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section id="categories" class="section-padding">
+    <div class="section-header">
+        <h2 class="section-title">Hosting <span class="gradient-text">Categories</span></h2>
+        <p class="section-subtitle">Choose from our specialized hosting solutions tailored for every need</p>
+    </div>
+    <div class="categories-grid">
+        <% categories.forEach((category, index) => { %>
+            <div class="category-card fade-in-up" style="animation-delay: <%= index * 0.1 %>s;">
+                <div class="category-icon">
+                    <img src="<%= category.image %>" alt="<%= category.name %>" class="category-image" 
+                         onerror="this.src='/images/default-category.png'">
+                </div>
+                <div class="category-content">
+                    <h3 class="category-title"><%= category.name %></h3>
+                    <p class="category-description"><%= category.count || 0 %> optimized plans available</p>
+                    <div class="category-features">
+                        <span class="feature-tag">SSD Storage</span>
+                        <span class="feature-tag">24/7 Support</span>
+                    </div>
+                    <a href="/c/<%= category.slug %>" class="btn btn-primary btn-sm">
+                        Explore Plans <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</section>
+
+<!-- Featured/Recent Products -->
+<section class="section-padding bg-dark-secondary">
+    <div class="section-header">
+        <h2 class="section-title">
+            <%= search ? 'Search Results' : 'Featured Hosting Plans' %>
+        </h2>
+        <p class="section-subtitle">
+            <%= search ? `Found ${featuredProducts.length} plans matching "${search}"` : 'Most popular hosting solutions chosen by our customers' %>
+        </p>
+    </div>
+    
+    <% if (featuredProducts && featuredProducts.length > 0) { %>
+        <div class="products-grid">
+            <% featuredProducts.forEach((product, index) => { %>
+                <div class="product-card slide-in-left" style="animation-delay: <%= index * 0.1 %>s;">
+                    <div class="product-badge">
+                        <span class="badge badge-popular">Popular</span>
+                        <% if (product.averageRating > 4.5) { %>
+                            <span class="badge badge-top-rated">Top Rated</span>
+                        <% } %>
+                    </div>
+                    
+                    <div class="product-header">
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image"
+                             onerror="this.src='/images/default-product.png'">
+                        <h3 class="product-title"><%= product.name %></h3>
+                        <p class="product-category"><%= product.category %></p>
+                    </div>
+                    
+                    <div class="product-description">
+                        <%= product.description.substring(0, 120) %>...
+                    </div>
+                    
+                    <div class="product-specs">
+                        <div class="spec-item">
+                            <i class="fas fa-microchip"></i>
+                            <div class="spec-content">
+                                <span class="spec-label">CPU</span>
+                                <span class="spec-value"><%= product.specs.cpu %>v Core</span>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-memory"></i>
+                            <div class="spec-content">
+                                <span class="spec-label">RAM</span>
+                                <span class="spec-value"><%= product.specs.ram %></span>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-hdd"></i>
+                            <div class="spec-content">
+                                <span class="spec-label">Storage</span>
+                                <span class="spec-value"><%= product.specs.disk %></span>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <i class="fas fa-network-wired"></i>
+                            <div class="spec-content">
+                                <span class="spec-label">Bandwidth</span>
+                                <span class="spec-value"><%= product.specs.bandwidth %></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-pricing">
+                        <div class="price-main">₹<%= product.priceMonthly %>/mo</div>
+                        <div class="price-comparison">
+                            <span class="price-old">₹<%= Math.round(product.priceMonthly * 1.2) %></span>
+                            <span class="price-discount">Save 20%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="product-actions">
+                        <a href="/products/<%= product.id %>" class="btn btn-primary btn-block">
+                            <i class="fas fa-info-circle"></i> View Details
+                        </a>
+                        <% if (isLoggedIn) { %>
+                            <a href="/products/<%= product.id %>" class="btn btn-outline btn-block">
+                                <i class="fas fa-shopping-cart"></i> Order Now
+                            </a>
+                        <% } else { %>
+                            <a href="/login" class="btn btn-outline btn-block">
+                                <i class="fas fa-sign-in-alt"></i> Login to Order
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else if (recentProducts && recentProducts.length > 0) { %>
+        <div class="products-grid">
+            <% recentProducts.forEach((product, index) => { %>
+                <div class="product-card slide-in-left" style="animation-delay: <%= index * 0.1 %>s;">
+                    <div class="product-header">
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image"
+                             onerror="this.src='/images/default-product.png'">
+                        <h3 class="product-title"><%= product.name %></h3>
+                        <p class="product-category"><%= product.category %></p>
+                    </div>
+                    
+                    <div class="product-specs-compact">
+                        <div class="spec-compact">
+                            <i class="fas fa-microchip"></i>
+                            <span><%= product.specs.cpu %>v Core</span>
+                        </div>
+                        <div class="spec-compact">
+                            <i class="fas fa-memory"></i>
+                            <span><%= product.specs.ram %> RAM</span>
+                        </div>
+                        <div class="spec-compact">
+                            <i class="fas fa-hdd"></i>
+                            <span><%= product.specs.disk %> DISK</span>
+                        </div>
+                    </div>
+                    
+                    <div class="product-price-compact">
+                        <div class="price-main">₹<%= product.priceMonthly %>/mo</div>
+                    </div>
+                    
+                    <a href="/products/<%= product.id %>" class="btn btn-primary btn-block">
+                        View Details & Order
+                    </a>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <i class="fas fa-search empty-icon"></i>
+            <h3>No Products Found</h3>
+            <p>We couldn't find any hosting plans matching your criteria. Try adjusting your search.</p>
+            <a href="/products" class="btn btn-primary">Browse All Plans</a>
+        </div>
+    <% } %>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="section-padding">
+    <div class="section-header">
+        <h2 class="section-title">Why Choose <span class="gradient-text">Our Hosting</span>?</h2>
+        <p class="section-subtitle">Enterprise features at affordable prices</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon security">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3>Military-Grade Security</h3>
+            <p>Advanced DDoS protection, SSL certificates, malware scanning, and automated backups keep your data safe 24/7.</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Free SSL Certificate</li>
+                <li><i class="fas fa-check"></i> DDoS Protection</li>
+                <li><i class="fas fa-check"></i> Daily Backups</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon performance">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h3>Lightning Fast Performance</h3>
+            <p>NVMe SSD storage, LiteSpeed web server, and optimized caching deliver sub-second load times for your websites.</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> NVMe SSD Storage</li>
+                <li><i class="fas fa-check"></i> LiteSpeed Server</li>
+                <li><i class="fas fa-check"></i> Built-in Caching</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon support">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h3>24/7 Expert Support</h3>
+            <p>Our hosting experts are available round-the-clock via live chat, phone, and ticket system to assist you instantly.</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> 24/7 Live Chat</li>
+                <li><i class="fas fa-check"></i> Phone Support</li>
+                <li><i class="fas fa-check"></i> 15-min Response Time</li>
+            </ul>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon scalable">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3>Easy Scalability</h3>
+            <p>Start small and grow big. Upgrade your resources instantly without migration or downtime as your business expands.</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check"></i> Instant Upgrades</li>
+                <li><i class="fas fa-check"></i> No Migration Needed</li>
+                <li><i class="fas fa-check"></i> Zero Downtime</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Ready to Launch Your Project?</h2>
+        <p>Join thousands of satisfied customers who trust us with their hosting needs. Get started in minutes.</p>
+        <div class="cta-actions">
+            <% if (isLoggedIn) { %>
+                <a href="/products" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket"></i> Browse All Plans
+                </a>
+            <% } else { %>
+                <a href="/register" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Start Free Trial
+                </a>
+                <a href="/products" class="btn btn-outline btn-lg">
+                    <i class="fas fa-eye"></i> View Plans
+                </a>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Enhanced Dark Theme Styles */
+:root {
+    --primary: #4a90e2;
+    --secondary: #50e3c2;
+    --success: #7ed321;
+    --dark: #1a1a1a;
+    --dark-secondary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --border-color: #404040;
+}
+
+body {
+    background-color: var(--dark);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.hero-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    padding: 4rem 0;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 80vh;
+}
+
+.hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.hero-video[poster] {
+    background-color: var(--dark); /* Fallback color while loading */
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(45, 45, 45, 0.6) 100%); /* Enhanced gradient overlay for better readability and aesthetics */
+    z-index: 2;
+}
+
+.hero-content,
+.hero-visual {
+    position: relative;
+    z-index: 3;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Enhanced shadow for better contrast over video */
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.floating-server {
+    font-size: 8rem;
+    color: var(--primary);
+    animation: float 3s ease-in-out infinite, rotate 6s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(74, 144, 226, 0.5)); /* Added glow effect for better visual appeal */
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.search-container {
+    max-width: 600px;
+    margin: 0 auto 3rem;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--dark-secondary);
+    border-radius: 50px;
+    padding: 0.5rem;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.search-input-group:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1), 0 4px 20px rgba(74, 144, 226, 0.2);
+}
+
+.search-icon {
+    color: var(--text-secondary);
+    margin: 0 1rem;
+    font-size: 1.1rem;
+}
+
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    padding: 1rem 0;
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.btn-search {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    white-space: nowrap;
+}
+
+.section-padding {
+    padding: 5rem 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.category-card {
+    background: var(--dark-secondary);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.category-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--primary);
+    box-shadow: 0 15px 40px rgba(74, 144, 226, 0.2);
+}
+
+.category-icon {
+    margin-bottom: 1.5rem;
+}
+
+.category-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.category-image:hover {
+    transform: scale(1.1);
+}
+
+.category-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.category-description {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.category-features {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.feature-tag {
+    background: rgba(74, 144, 226, 0.1);
+    color: var(--primary);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.feature-tag:hover {
+    background: rgba(74, 144, 226, 0.2);
+    transform: scale(1.05);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.product-card {
+    background: var(--dark);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover::before {
+    transform: scaleX(1);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.product-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-popular {
+    background: var(--primary);
+    color: white;
+}
+
+.badge-top-rated {
+    background: var(--success);
+    color: white;
+}
+
+.product-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.product-image:hover {
+    transform: scale(1.05);
+}
+
+.product-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.product-category {
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.product-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.product-specs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.spec-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: var(--dark-secondary);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.spec-item:hover {
+    background: rgba(74, 144, 226, 0.1);
+    transform: translateX(5px);
+}
+
+.spec-item i {
+    color: var(--primary);
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+.spec-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.spec-value {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.product-pricing {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--dark-secondary);
+    border-radius: 10px;
+}
+
+.price-main {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.price-comparison {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.price-old {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.price-discount {
+    background: var(--success);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: var(--dark-secondary);
+    border-radius: 15px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--primary);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Added shadow for depth */
+}
+
+.feature-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.feature-icon.security {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.feature-icon.performance {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.feature-icon.support {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.feature-icon.scalable {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.feature-card h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    text-align: left;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.feature-list li:hover {
+    color: var(--text-primary);
+    padding-left: 0.5rem;
+}
+
+.feature-list i {
+    color: var(--success);
+    min-width: 15px;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 20px;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-top: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.5; }
+}
+
+.cta-content {
+    position: relative;
+    z-index: 2;
+}
+
+.cta-content h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.cta-content p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Button enhancements for better UX */
+.btn {
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border: 1px solid var(--primary);
+}
+
+.btn-primary:hover {
+    background: darken(var(--primary), 10%);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2rem;
+        min-height: 70vh;
+        padding: 2rem 0;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-stats {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    /* On mobile, use a static background for performance, but keep video if possible; here fallback to enhanced static */
+    .hero-video {
+        display: none; /* Disabled on mobile for better performance */
+    }
+    
+    .hero-overlay {
+        background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+        border-radius: 20px;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+        border-radius: 15px;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    
+    .search-input {
+        padding: 1rem;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .btn-search {
+        width: 100%;
+        border-radius: 10px;
+        margin-top: 0.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .products-grid,
+    .categories-grid,
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-actions {
+        flex-direction: column;
+    }
+    
+    .cta-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .floating-server {
+        font-size: 6rem;
+    }
+    
+    .hero-stats {
+        gap: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .section-padding {
+        padding: 3rem 0;
+    }
+}
+
+/* Animation delays */
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Video error fallback */
+.hero-video:not([src]) {
+    background: var(--dark-secondary);
+}
+</style>
+
+<%- include('../partials/footer') %>

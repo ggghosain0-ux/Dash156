@@ -1,0 +1,88 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Coupons</h3>
+        <div class="header-actions">
+            <select class="form-control" onchange="window.location.href='/admin/coupons?status=' + this.value" style="width: auto;">
+                <option value="all" <%= currentStatus === 'all' ? 'selected' : '' %>>All Coupons</option>
+                <option value="active" <%= currentStatus === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="expired" <%= currentStatus === 'expired' ? 'selected' : '' %>>Expired</option>
+            </select>
+            <a href="/admin/coupons/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Coupon
+            </a>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Uses</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% coupons.forEach(coupon => { %>
+                <tr>
+                    <td><strong><%= coupon.code %></strong></td>
+                    <td>
+                        <span class="badge <%= coupon.couponType === 'percent' ? 'badge-info' : 'badge-secondary' %>">
+                            <%= coupon.couponType %>
+                        </span>
+                    </td>
+                    <td>
+                        <%= coupon.couponType === 'percent' ? coupon.value + '%' : '₹' + coupon.value %>
+                    </td>
+                    <td><%= coupon.uses %> / <%= coupon.maxUses || '∞' %></td>
+                    <td><%= coupon.expiresAt ? moment(coupon.expiresAt).format('MMM D, YYYY') : 'Never' %></td>
+                    <td>
+                        <span class="badge <%= coupon.isActive ? 'badge-success' : 'badge-danger' %>">
+                            <%= coupon.isActive ? 'Active' : 'Inactive' %>
+                        </span>
+                    </td>
+                    <td><%= moment(coupon.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <a href="/admin/coupons/<%= coupon.id %>/edit" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="/admin/coupons/<%= coupon.id %>/delete" method="POST" style="display: inline;"
+                              onsubmit="return confirmDelete('Delete this coupon?')">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>&status=<%= currentStatus %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>&status=<%= currentStatus %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>&status=<%= currentStatus %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

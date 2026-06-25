@@ -1,0 +1,73 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Ticket Statistics</h3>
+        <a href="/admin/tickets" class="btn btn-outline">Back to Tickets</a>
+    </div>
+    <div style="padding: 1.5rem;">
+        
+        <!-- Overall Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background: var(--dark); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);"><%= stats.total %></div>
+                <div style="color: var(--gray-light);">Total Tickets</div>
+            </div>
+            
+            <% stats.byStatus.forEach(statusStat => { %>
+            <div style="background: var(--dark); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);"><%= statusStat.count %></div>
+                <div style="color: var(--gray-light); text-transform: capitalize;"><%= statusStat.status %></div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- Stats by Department -->
+        <h4 style="margin-bottom: 1rem; color: var(--light);">Tickets by Department</h4>
+        <div class="table-container" style="margin-bottom: 2rem;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% stats.byDepartment.forEach(deptStat => { %>
+                    <tr>
+                        <td style="text-transform: capitalize;"><%= deptStat.department %></td>
+                        <td><%= deptStat.count %></td>
+                        <td><%= ((deptStat.count / stats.total) * 100).toFixed(1) %>%</td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stats by Priority -->
+        <h4 style="margin-bottom: 1rem; color: var(--light);">Tickets by Priority</h4>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Priority</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% stats.byPriority.forEach(prioStat => { %>
+                    <tr>
+                        <td style="text-transform: capitalize;"><%= prioStat.priority %></td>
+                        <td><%= prioStat.count %></td>
+                        <td><%= ((prioStat.count / stats.total) * 100).toFixed(1) %>%</td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

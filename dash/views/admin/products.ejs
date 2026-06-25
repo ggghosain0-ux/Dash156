@@ -1,0 +1,86 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Products - <%= currentCategoryName %></h3>
+        <div class="header-actions">
+            <select class="form-control" onchange="window.location.href='/admin/products?category=' + this.value" style="width: auto;">
+                <option value="">All Categories</option>
+                <% categories.forEach(cat => { %>
+                <option value="<%= cat.slug %>" <%= currentCategory === cat.slug ? 'selected' : '' %>>
+                    <%= cat.name %>
+                </option>
+                <% }) %>
+            </select>
+            <a href="/admin/products/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Monthly Price</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products.forEach(product => { %>
+                <tr>
+                    <td>
+                        <img src="<%= product.image %>" alt="<%= product.name %>" class="img-thumbnail" 
+                             onerror="this.src='/images/default-product.png'">
+                    </td>
+                    <td><%= product.name %></td>
+                    <td><%= product.category %></td>
+                    <td>₹<%= product.priceMonthly %></td>
+                    <td>
+                        <span class="badge <%= product.isActive ? 'badge-success' : 'badge-danger' %>">
+                            <%= product.isActive ? 'Active' : 'Inactive' %>
+                        </span>
+                    </td>
+                    <td><%= moment(product.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <a href="/admin/products/<%= product.id %>/edit" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="/admin/products/<%= product.id %>/delete" method="POST" style="display: inline;" 
+                              onsubmit="return confirmDelete('Delete this product?')">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>&category=<%= currentCategory %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>&category=<%= currentCategory %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>&category=<%= currentCategory %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

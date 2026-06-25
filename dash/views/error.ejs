@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Error - <%= status || 500 %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .error-container { text-align: center; margin: 80px auto; max-width: 700px; font-family: Arial, sans-serif; }
+    .error-code { font-size: 90px; font-weight: bold; color: #e74c3c; margin: 0; }
+    .error-title { font-size: 28px; color: #2c3e50; margin: 10px 0; }
+    .error-message { font-size: 18px; color: #7f8c8d; }
+    .error-details { background: #fdfd96; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: left; font-family: monospace; font-size: 13px; }
+    .back-link { display: inline-block; margin: 10px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="error-container">
+    <div class="error-code"><%= status || 500 %></div>
+    <h1 class="error-title"><%= message || 'An unexpected error occurred' %></h1>
+    <p class="error-message">We're sorry for the inconvenience. Please try again later.</p>
+
+    <% if (typeof error !== 'undefined' && error && process.env.NODE_ENV !== 'production') { %>
+      <div class="error-details">
+        <strong>Debug Info:</strong><br>
+        <%= error.toString() %>
+        <% if (error.stack) { %>
+          <pre style="margin-top: 10px; font-size: 11px; overflow-x: auto;"><%= error.stack %></pre>
+        <% } %>
+      </div>
+    <% } %>
+
+    <a href="javascript:history.back()" class="back-link">Go Back</a>
+    <a href="/" class="back-link">Home Page</a>
+  </div>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

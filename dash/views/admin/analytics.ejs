@@ -1,0 +1,114 @@
+<%- include('../partials/admin-header') %>
+
+<!-- Analytics Stats -->
+<div class="stats-grid fade-in">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-value"><%= totalVisits || 0 %></div>
+        <div class="stat-label">Total Visits</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value"><%= uniqueVisitors || 0 %></div>
+        <div class="stat-label">Unique Visitors</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="stat-value"><%= visitsToday || 0 %></div>
+        <div class="stat-label">Today's Visits</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-value"><%= uniqueToday ? uniqueToday.count : 0 %></div>
+        <div class="stat-label">Unique Today</div>
+    </div>
+</div>
+
+<!-- Date Filter -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Analytics Overview</h3>
+        <a href="/admin/analytics/export?dateFrom=<%= dateFrom %>&dateTo=<%= dateTo %>" class="btn btn-outline">
+            <i class="fas fa-download"></i> Export CSV
+        </a>
+    </div>
+    <div style="padding: 1.5rem;">
+        <form method="GET" class="form-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <label class="form-label">From Date</label>
+                <input type="date" name="dateFrom" value="<%= dateFrom %>" class="form-control">
+            </div>
+            <div>
+                <label class="form-label">To Date</label>
+                <input type="date" name="dateTo" value="<%= dateTo %>" class="form-control">
+            </div>
+            <div style="align-self: end;">
+                <button type="submit" class="btn btn-primary">Apply Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Top Pages -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Top Pages</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Page</th>
+                    <th>Visits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% topPages.forEach(page => { %>
+                <tr>
+                    <td><%= page.page %></td>
+                    <td><%= page.count %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent Visits -->
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Recent Visits</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>IP Address</th>
+                    <th>Country</th>
+                    <th>Page</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% recentVisits.forEach(visit => { %>
+                <tr>
+                    <td><%= visit.ip %></td>
+                    <td><%= visit.country || 'Unknown' %></td>
+                    <td><%= visit.page %></td>
+                    <td><%= moment(visit.timestamp).format('MMM D, HH:mm') %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

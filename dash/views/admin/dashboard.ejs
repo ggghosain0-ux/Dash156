@@ -1,0 +1,138 @@
+<%- include('../partials/admin-header') %>
+
+<div class="admin-content">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Users</h3>
+                <div class="number"><%= stats.totalUsers || 0 %></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Monthly Revenue</h3>
+                <div class="number">₹<%= monthlyRevenue || 0 %></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-cube"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Active Products</h3>
+                <div class="number"><%= stats.totalProducts || 0 %></div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Open Tickets</h3>
+                <div class="number"><%= stats.openTickets || 0 %></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <!-- Recent Orders -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Orders</h2>
+                    <a href="/admin/orders" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <% if (recentOrders && recentOrders.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Product</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% recentOrders.forEach(order => { %>
+                                        <tr>
+                                            <td>#<%= order.id.slice(0, 8) %></td>
+                                            <td><%= order.productName %></td>
+                                            <td>₹<%= order.price %></td>
+                                            <td>
+                                                <span class="badge badge-<%= 
+                                                    order.status === 'active' ? 'success' : 
+                                                    order.status === 'pending' ? 'warning' : 
+                                                    order.status === 'cancelled' ? 'danger' : 'secondary'
+                                                %>">
+                                                    <%= order.status %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No recent orders found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6">
+            <!-- Recent Users -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Users</h2>
+                    <a href="/admin/users" class="btn btn-outline btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <% if (recentUsers && recentUsers.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Joined</th>
+                                        <th>Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% recentUsers.forEach(user => { %>
+                                        <tr>
+                                            <td><%= user.firstName %> <%= user.lastName %></td>
+                                            <td><%= user.email %></td>
+                                            <td><%= moment(user.createdAt).format('MMM D, YYYY') %></td>
+                                            <td>
+                                                <span class="badge <%= user.isAdmin ? 'badge-primary' : 'badge-secondary' %>">
+                                                    <%= user.isAdmin ? 'Admin' : 'User' %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">No users found.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

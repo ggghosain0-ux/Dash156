@@ -1,0 +1,205 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header text-center">
+            <h1 class="card-title">
+                <% if (order.method === 'upi') { %>
+                    UPI Payment
+                <% } else if (order.method === 'cash') { %>
+                    Bank Transfer
+                <% } else { %>
+                    Complete Payment
+                <% } %>
+            </h1>
+        </div>
+
+        <div class="text-center mb-3">
+            <div class="stat-number">₹<%= order.amount %></div>
+            <p class="text-secondary">Order #<%= order.id %></p>
+        </div>
+
+        <% if (order.method === 'upi') { %>
+            <!-- UPI Payment -->
+            <div class="text-center">
+                <% if (qrUrl) { %>
+                    <div style="background: white; padding: 1rem; border-radius: 8px; display: inline-block; margin-bottom: 1rem;">
+                        <img src="<%= qrUrl %>" alt="UPI QR Code" style="max-width: 200px; height: auto;">
+                    </div>
+                <% } %>
+                
+                <div class="form-group">
+                    <label class="form-label">UPI ID</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" class="form-input" value="<%= upiId %>" id="upiId" readonly>
+                        <button type="button" class="btn btn-outline" onclick="copyUPIId()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <h3 class="mb-1">Payment Instructions</h3>
+                    <ol style="text-align: left; color: var(--text-secondary); padding-left: 1.5rem;">
+                        <li>Open your UPI app (Google Pay, PhonePe, Paytm, etc.)</li>
+                        <li>Scan the QR code or send payment to the UPI ID above</li>
+                        <li>Enter the exact amount: <strong>₹<%= order.amount %></strong></li>
+                        <li>Add order ID <strong>#<%= order.id %></strong> in notes</li>
+                        <li>Complete the payment</li>
+                    </ol>
+                </div>
+            </div>
+
+        <% } else if (order.method === 'cash') { %>
+            <!-- Bank Transfer -->
+            <div class="text-center">
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h3 class="mb-2">Bank Transfer Details</h3>
+                    
+                    <div style="text-align: left;">
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>Account Name:</strong>
+                            <span><%= siteName %></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>Account Number:</strong>
+                            <span>1234567890</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>IFSC Code:</strong>
+                            <span>SBIN0000123</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>Bank Name:</strong>
+                            <span>State Bank of India</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                            <strong>Amount:</strong>
+                            <span>₹<%= order.amount %></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                            <strong>Reference:</strong>
+                            <span>#<%= order.id %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--warning); color: var(--bg-primary); padding: 1rem; border-radius: 6px; margin: 1rem 0;">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Important</strong>
+                    <p style="margin: 0.5rem 0 0 0;">Please include Order ID <strong>#<%= order.id %></strong> in the transaction reference.</p>
+                </div>
+            </div>
+
+        <% } else if (order.method === 'razorpay') { %>
+            <!-- Razorpay Payment -->
+            <div class="text-center">
+                <div style="background: var(--bg-tertiary); padding: 2rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <i class="fas fa-credit-card" style="font-size: 3rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+                    <h3>Credit/Debit Card Payment</h3>
+                    <p class="text-secondary">You will be redirected to secure payment page</p>
+                </div>
+
+                <button id="rzp-button" class="btn btn-primary" style="width: 100%; padding: 1rem;">
+                    <i class="fas fa-lock"></i> Pay Securely - ₹<%= order.amount %>
+                </button>
+            </div>
+        <% } %>
+
+        <div class="text-center mt-3">
+            <p class="text-secondary">
+                Order will be activated after payment confirmation<br>
+                <small>Confirmation may take 1-2 hours for bank transfers</small>
+            </p>
+            <a href="/orders/<%= order.id %>" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Order
+            </a>
+        </div>
+    </div>
+
+    <!-- Support Card -->
+    <div class="card mt-3">
+        <div class="text-center">
+            <h3 class="mb-1"><i class="fas fa-headset"></i> Need Help?</h3>
+            <p class="text-secondary mb-2">Having trouble with payment?</p>
+            <a href="/tickets/new" class="btn btn-outline btn-sm">
+                <i class="fas fa-ticket-alt"></i> Contact Support
+            </a>
+        </div>
+    </div>
+</div>
+
+<% if (order.method === 'razorpay') { %>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('rzp-button').onclick = function(e) {
+        e.preventDefault();
+        
+        const options = {
+            "key": "<%= key %>",
+            "amount": "<%= order.amount * 100 %>",
+            "currency": "INR",
+            "name": "<%= siteName %>",
+            "description": "Order #<%= order.id %>",
+            "order_id": "<%= order.razorpayOrderId %>",
+            "handler": function (response){
+                // Submit form with payment details
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/verify-razorpay-payment';
+                
+                const fields = {
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderId: '<%= order.id %>'
+                };
+                
+                for (const [key, value] of Object.entries(fields)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            },
+            "prefill": {
+                "name": "<%= user.firstName %> <%= user.lastName %>",
+                "email": "<%= user.email %>"
+            },
+            "theme": {
+                "color": "#3b82f6"
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+    };
+</script>
+<% } %>
+
+<script>
+function copyUPIId() {
+    const upiId = document.getElementById('upiId');
+    upiId.select();
+    upiId.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Show copied message
+    const btn = event.target.closest('button');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.background = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+    }, 2000);
+}
+</script>
+
+<%- include('../partials/footer') %>

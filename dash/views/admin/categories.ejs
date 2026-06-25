@@ -1,0 +1,74 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Categories</h3>
+        <a href="/admin/categories/new" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Category
+        </a>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(category => { %>
+                <tr>
+                    <td>
+                        <img src="<%= category.image %>" alt="<%= category.name %>" class="img-thumbnail"
+                             onerror="this.src='/images/default-category.png'">
+                    </td>
+                    <td><%= category.name %></td>
+                    <td><%= category.slug %></td>
+                    <td>
+                        <span class="badge <%= category.isActive ? 'badge-success' : 'badge-danger' %>">
+                            <%= category.isActive ? 'Active' : 'Inactive' %>
+                        </span>
+                    </td>
+                    <td><%= moment(category.createdAt).format('MMM D, YYYY') %></td>
+                    <td>
+                        <a href="/admin/categories/<%= category.id %>/edit" class="btn btn-outline btn-sm">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form action="/admin/categories/<%= category.id %>/delete" method="POST" style="display: inline;"
+                              onsubmit="return confirmDelete('Delete this category?')">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+<% if (pagination.totalPages > 1) { %>
+<div class="pagination">
+    <% if (pagination.hasPrev) { %>
+        <a href="?page=<%= pagination.page - 1 %>" class="page-link">Previous</a>
+    <% } %>
+    
+    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <a href="?page=<%= i %>" class="page-link <%= i === pagination.page ? 'active' : '' %>">
+            <%= i %>
+        </a>
+    <% } %>
+    
+    <% if (pagination.hasNext) { %>
+        <a href="?page=<%= pagination.page + 1 %>" class="page-link">Next</a>
+    <% } %>
+</div>
+<% } %>
+
+<%- include('../partials/admin-footer') %>

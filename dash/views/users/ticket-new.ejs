@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<div class="fade-in-up" style="max-width: 800px; margin: 0 auto;">
+    <div class="page-header">
+        <h1 class="page-title">Create Support Ticket</h1>
+        <p class="page-subtitle">We're here to help! Please provide details about your issue.</p>
+    </div>
+
+    <div class="category-card">
+        <form action="/tickets" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+                <div class="form-group">
+                    <label class="form-label">Department *</label>
+                    <select name="department" class="form-select" required>
+                        <option value="">Select Department</option>
+                        <% TICKET_CONFIG.DEPARTMENTS.forEach(dept => { %>
+                            <option value="<%= dept %>" <%= (formData.department === dept) ? 'selected' : '' %>>
+                                <%= dept.charAt(0).toUpperCase() + dept.slice(1) %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Priority *</label>
+                    <select name="priority" class="form-select" required>
+                        <option value="">Select Priority</option>
+                        <% TICKET_CONFIG.PRIORITIES.forEach(priority => { %>
+                            <option value="<%= priority %>" <%= (formData.priority === priority) ? 'selected' : '' %>>
+                                <%= priority.charAt(0).toUpperCase() + priority.slice(1) %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Subject *</label>
+                <input type="text" name="subject" class="form-input" 
+                       value="<%= formData.subject || '' %>" 
+                       placeholder="Brief description of your issue" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Message *</label>
+                <textarea name="message" class="form-textarea" 
+                          placeholder="Please provide detailed information about your issue..." 
+                          rows="8" required><%= formData.message || '' %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tags</label>
+                <input type="text" name="tags" class="form-input" 
+                       value="<%= formData.tags || '' %>" 
+                       placeholder="bug, payment, login (comma separated)">
+                <small class="text-text-muted">Add relevant tags to help us categorize your ticket</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Attachments</label>
+                <input type="file" name="attachments" class="form-input" 
+                       multiple accept=".jpg,.jpeg,.png,.pdf,.txt">
+                <small class="text-text-muted">
+                    You can upload up to <%= TICKET_CONFIG.MAX_ATTACHMENTS %> files (images, PDF, text). 
+                    Maximum file size: 10MB each.
+                </small>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Ticket
+                </button>
+                <a href="/tickets" class="btn btn-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Tips -->
+    <div class="category-card mt-3">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+            <i class="fas fa-lightbulb text-warning"></i> Tips for Faster Support
+        </h3>
+        
+        <div class="space-y-2 text-sm">
+            <div class="flex items-start gap-2">
+                <i class="fas fa-check text-success mt-1"></i>
+                <span>Provide detailed information about your issue</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <i class="fas fa-check text-success mt-1"></i>
+                <span>Include relevant order numbers or product names</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <i class="fas fa-check text-success mt-1"></i>
+                <span>Attach screenshots or error messages if applicable</span>
+            </div>
+            <div class="flex items-start gap-2">
+                <i class="fas fa-check text-success mt-1"></i>
+                <span>Choose the correct department and priority level</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

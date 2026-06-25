@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= siteName %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f1117 0%, #1a1d29 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.6;
+        }
+
+        .maintenance-container {
+            max-width: 500px;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .maintenance-icon {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 1.5rem;
+        }
+
+        .maintenance-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .maintenance-message {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-container {
+            background: #1a1d29;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border: 1px solid #2d3748;
+        }
+
+        .progress-bar {
+            background: #252a3a;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            height: 100%;
+            width: 75%;
+            border-radius: 10px;
+            animation: progressAnimation 2s ease-in-out infinite;
+        }
+
+        @keyframes progressAnimation {
+            0% { width: 75%; }
+            50% { width: 85%; }
+            100% { width: 75%; }
+        }
+
+        .status-list {
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .status-complete {
+            color: #10b981;
+        }
+
+        .status-in-progress {
+            color: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        .status-pending {
+            color: #64748b;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .contact-info {
+            background: #1a1d29;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid #2d3748;
+        }
+
+        .admin-login {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #2d3748;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #3b82f6;
+            color: white;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="maintenance-container">
+        <div class="maintenance-icon">
+            <i class="fas fa-tools"></i>
+        </div>
+        
+        <h1 class="maintenance-title">Under Maintenance</h1>
+        
+        <p class="maintenance-message">
+            We're currently performing scheduled maintenance to improve your experience. 
+            The site will be back online shortly.
+        </p>
+
+        <div class="progress-container">
+            <h3 style="margin-bottom: 1rem;">Maintenance Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            
+            <div class="status-list">
+                <div class="status-item">
+                    <div class="status-icon">
+                        <i class="fas fa-server status-complete"></i>
+                    </div>
+                    <div>
+                        <strong>Server Updates</strong>
+                        <div style="color: #64748b; font-size: 0.875rem;">Completed</div>
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon">
+                        <i class="fas fa-database status-in-progress"></i>
+                    </div>
+                    <div>
+                        <strong>Database Optimization</strong>
+                        <div style="color: #64748b; font-size: 0.875rem;">In progress...</div>
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon">
+                        <i class="fas fa-shield-alt status-pending"></i>
+                    </div>
+                    <div>
+                        <strong>Security Enhancements</strong>
+                        <div style="color: #64748b; font-size: 0.875rem;">Pending</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <h3 style="margin-bottom: 1rem;"><i class="fas fa-clock"></i> Estimated Time</h3>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;">
+                We expect to be back in approximately <strong>30 minutes</strong>.<br>
+                Thank you for your patience.
+            </p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="location.reload()" class="btn">
+                    <i class="fas fa-redo"></i> Refresh Page
+                </button>
+            </div>
+        </div>
+
+        <% if (user && user.isAdmin) { %>
+            <div class="admin-login">
+                <p style="color: #94a3b8; margin-bottom: 1rem;">
+                    <i class="fas fa-user-shield"></i> Admin Access
+                </p>
+                <a href="/admin" class="btn btn-outline">
+                    <i class="fas fa-cog"></i> Access Admin Panel
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Auto-refresh every 2 minutes
+        setInterval(() => {
+            fetch('/')
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                })
+                .catch(() => {
+                    // Server still down, continue waiting
+                });
+        }, 120000);
+
+        // Update estimated time
+        function updateEstimatedTime() {
+            const startTime = Date.now();
+            const estimatedEnd = startTime + 30 * 60 * 1000; // 30 minutes from now
+            
+            function update() {
+                const now = Date.now();
+                const remaining = estimatedEnd - now;
+                
+                if (remaining <= 0) {
+                    document.querySelector('.maintenance-message').innerHTML = 
+                        'Maintenance should be complete soon. Please refresh the page.';
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                
+                document.querySelector('.contact-info p').innerHTML = 
+                    `We expect to be back in approximately <strong>${minutes}m ${seconds}s</strong>.<br>
+                     Thank you for your patience.`;
+            }
+            
+            update();
+            setInterval(update, 1000);
+        }
+        
+        updateEstimatedTime();
+    </script>
+</body>
+</html>

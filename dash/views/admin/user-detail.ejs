@@ -1,0 +1,147 @@
+<%- include('../partials/admin-header') %>
+
+<div class="card fade-in">
+    <div class="card-header">
+        <h3 class="card-title"><%= user.firstName %> <%= user.lastName %></h3>
+        <a href="/admin/users" class="btn btn-outline">Back to Users</a>
+    </div>
+    <div style="padding: 1.5rem;">
+        
+        <!-- User Edit Form -->
+        <form action="/admin/users/<%= user.id %>" method="POST">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="firstName" value="<%= user.firstName %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="lastName" value="<%= user.lastName %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" value="<%= user.email %>" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" name="phone" value="<%= user.phone || '' %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="address" value="<%= user.address || '' %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">City</label>
+                    <input type="text" name="city" value="<%= user.city || '' %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <input type="text" name="state" value="<%= user.state || '' %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Postal Code</label>
+                    <input type="text" name="postalCode" value="<%= user.postalCode || '' %>" class="form-control">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="isAdmin" <%= user.isAdmin ? 'checked' : '' %>> Administrator
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="isActive" <%= user.isActive ? 'checked' : '' %>> Active User
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update User</button>
+        </form>
+
+        <!-- User Stats -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+            <div style="background: var(--dark); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary);"><%= orders.length %></div>
+                <div style="color: var(--gray-light);">Total Orders</div>
+            </div>
+            <div style="background: var(--dark); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--success);"><%= userTickets || 0 %></div>
+                <div style="color: var(--gray-light);">Support Tickets</div>
+            </div>
+            <div style="background: var(--dark); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">
+                    <%= moment(user.lastLogin).fromNow() %>
+                </div>
+                <div style="color: var(--gray-light);">Last Login</div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <h4 style="margin: 2rem 0 1rem 0; color: var(--light);">Recent Orders</h4>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                    <tr>
+                        <td>#<%= order.id.slice(0, 8) %></td>
+                        <td><%= order.productName %></td>
+                        <td>₹<%= order.price %></td>
+                        <td>
+                            <span class="badge badge-<%= 
+                                order.status === 'active' ? 'success' : 
+                                order.status === 'pending' ? 'warning' : 'danger' 
+                            %>">
+                                <%= order.status %>
+                            </span>
+                        </td>
+                        <td><%= moment(order.createdAt).format('MMM D, YYYY') %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Admin Actions -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+            <div style="display: flex; gap: 1rem;">
+                <form action="/admin/users/<%= user.id %>/reset-password" method="POST">
+                    <button type="submit" class="btn btn-warning" 
+                            onclick="return confirm('Reset password for this user? They will receive an email with the new temporary password.')">
+                        <i class="fas fa-key"></i> Reset Password
+                    </button>
+                </form>
+                
+                <% if (user.id !== user.id) { %>
+                <form action="/admin/users/<%= user.id %>/delete" method="POST"
+                      onsubmit="return confirmDelete('Are you sure you want to delete this user? This action cannot be undone.')">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete User
+                    </button>
+                </form>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>
