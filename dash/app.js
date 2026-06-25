@@ -2,7 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+const uuidv4 = () => crypto.randomUUID();
 const moment = require('moment');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -12,7 +13,6 @@ const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
 const flash = require('connect-flash');
 const Razorpay = require('razorpay');
-const crypto = require('crypto');
 const cron = require('node-cron');
 const geoip = { lookup: () => null };
 const helmet = require('helmet');
@@ -22,14 +22,20 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 // DATABASE SETUP (SQLite3)
 // ======================
 const DB_PATH = path.join(__dirname, 'hosting.db');
-const db = new sqlite3.Database(DB_PATH, (err) => {
-    if (err) {
-        console.error('Error opening database:', err);
-    } else {
-        console.log('Connected to SQLite database.');
-        initDatabase();
-    }
-});
+let db;
+
+function openDatabase() {
+    db = new sqlite3.Database(DB_PATH, (err) => {
+        if (err) {
+            console.error('Error opening database:', err);
+        } else {
+            console.log('Connected to SQLite database.');
+            initDatabase();
+        }
+    });
+}
+
+openDatabase();
 
 function runDb(sql, params = []) {
     return new Promise((resolve, reject) => {
@@ -238,9 +244,53 @@ async function initDatabase() {
         // Force update existing site name and description to ensure the new branding takes effect
         await runDb('UPDATE settings SET value = "VOIDORA CLOUD DASHBOARD" WHERE key = "site_name"');
         await runDb('UPDATE settings SET value = "VOIDORA CLOUD - Best Reliable Cloud & VPS Hosting Solutions" WHERE key = "site_description" AND (value = "Reliable web hosting solutions" OR value = "Best Reliable Minecraft & Vps Hosting Solutions" OR value IS NULL)');
+        
+        // Auto-seed default categories if empty (e.g., on first startup or after database corruption fix)
+        const categoryCountRow = await dbGet('SELECT COUNT(*) as count FROM categories');
+        if (categoryCountRow.count === 0) {
+            console.log('Database empty. Seeding default Cloud categories and products...');
+            
+            // 1. Seed Categories
+            await runDb(`INSERT INTO categories (id, name, slug, description, image, isActive) VALUES 
+                ('1479c704-ede4-4d6f-a7e3-ffd6713de887', 'Cloud Compute', 'cloud-compute', 'High-Performance Cloud Compute Instances', 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=600', 1)`);
+            
+            await runDb(`INSERT INTO categories (id, name, slug, description, image, isActive) VALUES 
+                ('adc1d1aa-31cc-4932-8355-3886cbcf498d', 'VPS', 'vps', 'High Performance Virtual Private Servers', '/images/default-category.png', 1)`);
+
+            // 2. Seed Products
+            await runDb(`INSERT INTO products (id, name, description, categoryId, specs, features, priceMonthly, priceQuarterly, priceYearly, image, isActive) VALUES 
+                ('6b287148-23ab-44d2-bded-7b7dcee550f3', 'Standard Cloud Instance', 'Optimized CPU and memory allocation for general purpose workloads, API servers, and lightweight applications.', '1479c704-ede4-4d6f-a7e3-ffd6713de887', '{"cpu": "1 vCPU", "ram": "2 GB RAM", "storage": "40 GB NVMe SSD", "bandwidth": "1 TB Traffic"}', '["Root Access", "DDoS Protection", "Instant Setup"]', 5, 14, 50, 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600', 1)`);
+
+            await runDb(`INSERT INTO products (id, name, description, categoryId, specs, features, priceMonthly, priceQuarterly, priceYearly, image, isActive) VALUES 
+                ('11202cc4-1b18-4435-b604-246e0c68134c', 'Premium Cloud Instance', 'Blazing fast NVMe SSD storage, high-frequency processors, and high-bandwidth network connectivity.', '1479c704-ede4-4d6f-a7e3-ffd6713de887', '{"cpu": "2 vCPU", "ram": "4 GB RAM", "storage": "80 GB NVMe SSD", "bandwidth": "2 TB Traffic"}', '["Root Access", "DDoS Protection", "Instant Setup", "Daily Backups"]', 12, 33, 120, 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=600', 1)`);
+
+            await runDb(`INSERT INTO products (id, name, description, categoryId, specs, features, priceMonthly, priceQuarterly, priceYearly, image, isActive) VALUES 
+                ('6256e83d-2500-41d3-bf71-fabeac118b56', 'Dedicated Enterprise Instance', 'Fully isolated compute resources, tailored for heavy database queries, AI model serving, and high traffic enterprise web apps.', '1479c704-ede4-4d6f-a7e3-ffd6713de887', '{"cpu": "4 vCPU", "ram": "8 GB RAM", "storage": "160 GB NVMe SSD", "bandwidth": "5 TB Traffic"}', '["Root Access", "DDoS Protection", "Instant Setup", "Daily Backups", "Dedicated IP"]', 25, 68, 240, 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=600', 1)`);
+            
+            console.log('Seeded default Cloud categories and products successfully.');
+        }
+
         console.log('Database initialized successfully.');
     } catch (err) {
         console.error('Error initializing database:', err);
+        if (err.message && err.message.includes('SQLITE_CORRUPT')) {
+            console.error('CRITICAL: SQLite database file is corrupted! Attempting to heal by recreating the database...');
+            try {
+                db.close((closeErr) => {
+                    if (closeErr) console.error('Error closing corrupt DB:', closeErr);
+                    
+                    const corruptBackupPath = `${DB_PATH}.corrupt-${Date.now()}`;
+                    if (fs.existsSync(DB_PATH)) {
+                        fs.renameSync(DB_PATH, corruptBackupPath);
+                        console.log(`Corrupt database backed up to ${corruptBackupPath}`);
+                    }
+                    
+                    openDatabase();
+                });
+            } catch (healErr) {
+                console.error('Failed to auto-heal corrupt database:', healErr);
+            }
+        }
     }
 }
 
