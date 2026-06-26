@@ -526,7 +526,7 @@ app.use((req, res, next) => {
     
     if (activeTheme && activeTheme !== 'default') {
         let filePath = null;
-        if (req.path.startsWith('/css/')) {
+        if (req.path.startsWith('/css/') && req.path !== '/css/style.css' && req.path !== '/css/admin.css') {
             const cleanPath = req.path.replace(/^\/css\//, '');
             filePath = path.join(THEMES_DIR, activeTheme, 'styles', cleanPath);
             if (!fs.existsSync(filePath)) {
@@ -559,9 +559,19 @@ app.use('/theme-assets', (req, res, next) => {
     express.static(path.join(THEMES_DIR, activeTheme, 'assets'))(req, res, next);
 });
 
-app.use('/theme-styles', (req, res, next) => {
+app.get('/theme-styles/style.css', (req, res) => {
     const activeTheme = getActiveThemeName();
-    express.static(path.join(THEMES_DIR, activeTheme, 'styles'))(req, res, next);
+    if (activeTheme && activeTheme !== 'default') {
+        let stylePath = path.join(THEMES_DIR, activeTheme, 'styles', 'style.css');
+        if (!fs.existsSync(stylePath)) {
+            stylePath = path.join(THEMES_DIR, activeTheme, 'css', 'style.css');
+        }
+        if (fs.existsSync(stylePath) && fs.statSync(stylePath).isFile()) {
+            return res.sendFile(stylePath);
+        }
+    }
+    res.setHeader('Content-Type', 'text/css');
+    res.send('');
 });
 
 app.use(express.static(path.join(__dirname, 'public'))); // Serves /uploads if under public/uploads
@@ -610,6 +620,7 @@ app.use((req, res, next) => {
     res.locals.moment = moment;
     res.locals.isLoggedIn = !!req.session.authorised;
     res.locals.user = req.session.user || null;
+    res.locals.activeTheme = getActiveThemeName();
     next();
 });
 
@@ -725,7 +736,11 @@ const transporter = nodemailer.createTransport({
 // ======================
 const helpers = {
     validateEmail: email => validator.isEmail(email),
-    validatePhone: phone => validator.isMobilePhone(phone, 'any'),
+    validatePhone: phone => {
+        if (!phone || typeof phone !== 'string') return false;
+        const cleanPhone = phone.replace(/[^\d+]/g, '');
+        return validator.isMobilePhone(cleanPhone, 'any') || (cleanPhone.length >= 7 && cleanPhone.length <= 15);
+    },
     validatePassword: password => password && password.length >= 8,
     sanitize: (str) => validator.escape(str).trim(),
     hashPassword: password => bcrypt.hashSync(password, SALT_ROUNDS),
@@ -3208,11 +3223,12 @@ app.get('/admin/settings', requireAdmin, async (req, res) => {
 });
 
 app.post('/admin/settings/general', requireAdmin, upload.fields([{name: 'site_logo', maxCount: 1}, {name: 'site_favicon', maxCount: 1}]), async (req, res) => {
-    const { site_name, site_description, contact_email } = req.body;
+    const { site_name, site_description, contact_email, discord_server } = req.body;
     const updateFields = [
         {key: 'site_name', value: helpers.sanitize(site_name || 'Hosting Service')},
         {key: 'site_description', value: helpers.sanitize(site_description || '')},
-        {key: 'contact_email', value: helpers.sanitize(contact_email || '')}
+        {key: 'contact_email', value: helpers.sanitize(contact_email || '')},
+        {key: 'discord_server', value: (discord_server || '').trim()}
     ];
     try {
         for (const field of updateFields) {
