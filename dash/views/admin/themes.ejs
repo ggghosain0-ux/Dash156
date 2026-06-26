@@ -1,0 +1,160 @@
+<%- include('../partials/admin-header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-0 text-gray-800"><i class="fas fa-paint-brush me-2"></i>Theme Manager</h2>
+        <p class="text-muted mb-0">Customize the user dashboard and portal interface without modifying backend files.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form action="/admin/themes/refresh" method="POST">
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="fas fa-sync-alt me-1"></i> Refresh Themes
+            </button>
+        </form>
+    </div>
+</div>
+
+<% if (messages && messages.success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-1"></i> <%= messages.success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+<% if (messages && messages.error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-1"></i> <%= messages.error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% } %>
+
+<div class="row">
+    <!-- Theme Cards Grid -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 font-weight-bold">Installed Themes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <% if (themes && themes.length > 0) { %>
+                        <% themes.forEach(theme => { %>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 theme-card <%= theme.id === activeTheme ? 'border-primary border-2 shadow-sm' : 'border-light' %>" style="transition: transform 0.2s;">
+                                    <div class="position-relative" style="height: 160px; overflow: hidden; background-color: #f8f9fc;">
+                                        <img src="/admin/themes/preview/<%= theme.id %>" class="card-img-top w-100 h-100" style="object-fit: cover;" onerror="this.src='/images/default-category.png'">
+                                        <% if (theme.id === activeTheme) { %>
+                                            <span class="badge bg-primary position-absolute top-3 start-3 shadow">
+                                                <i class="fas fa-star me-1"></i> Active
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0 font-weight-bold"><%= theme.name %></h5>
+                                            <span class="badge bg-secondary text-xs">v<%= theme.version %></span>
+                                        </div>
+                                        <p class="card-text text-muted text-sm mb-3" style="font-size: 0.85rem; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                            <%= theme.description %>
+                                        </p>
+                                        <div class="d-flex flex-wrap gap-2 text-muted mb-3" style="font-size: 0.8rem;">
+                                            <div><i class="fas fa-user me-1"></i> <%= theme.author %></div>
+                                            <div class="ms-auto"><i class="fas fa-code-branch me-1"></i> Host v<%= theme.dashboardVersion %></div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-white d-flex justify-content-between gap-1 p-2">
+                                        <% if (theme.id === activeTheme) { %>
+                                            <form action="/admin/themes/disable/<%= theme.id %>" method="POST" class="flex-grow-1">
+                                                <button type="submit" class="btn btn-warning btn-sm w-100" <%= theme.id === 'default' ? 'disabled' : '' %>>
+                                                    <i class="fas fa-power-off me-1"></i> Disable
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/admin/themes/activate/<%= theme.id %>" method="POST" class="flex-grow-1">
+                                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                    <i class="fas fa-check me-1"></i> Activate
+                                                </button>
+                                            </form>
+                                        <% } %>
+
+                                        <form action="/admin/themes/duplicate/<%= theme.id %>" method="POST">
+                                            <button type="submit" class="btn btn-outline-info btn-sm" title="Duplicate Theme">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </form>
+
+                                        <% if (theme.id !== 'default' && theme.id !== activeTheme) { %>
+                                            <form action="/admin/themes/delete/<%= theme.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this theme? All customized views will be permanently deleted.')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Theme">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-paint-brush fa-3x text-muted mb-3"></i>
+                            <h5>No themes found</h5>
+                            <p class="text-muted">No themes are currently installed inside the dashboard themes directory.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ZIP Theme Upload & Developer Information -->
+    <div class="col-lg-4">
+        <!-- ZIP Upload Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 font-weight-bold">Install Theme (.zip)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-sm">Upload a theme ZIP file. The system will automatically validate the directory structure, theme configuration, and dashboard compatibility.</p>
+                <form action="/admin/themes/upload" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Choose ZIP File</label>
+                        <input type="file" name="theme_zip" accept=".zip" class="form-control" required>
+                        <div class="form-text">ZIP files must contain a valid <code>theme.json</code> file at the root or within the first subdirectory.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-upload me-1"></i> Install Theme
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Creator Mode / Developer Panel -->
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 font-weight-bold">Developer Experience</h5>
+            </div>
+            <div class="card-body">
+                <h6>Adding a new Theme is simple:</h6>
+                <ol class="text-sm text-muted ps-3 mb-3">
+                    <li class="mb-2">Create a new directory inside <code>/themes/</code>.</li>
+                    <li class="mb-2">Include a <code>theme.json</code> file and an optional <code>preview.png</code>.</li>
+                    <li class="mb-2">Customize directories: <code>pages/</code>, <code>layouts/</code>, <code>components/</code>, <code>styles/</code>, or <code>assets/</code>.</li>
+                    <li class="mb-2">Click <strong>Refresh Themes</strong> above to register it.</li>
+                    <li class="mb-2">Activate it from this dashboard page!</li>
+                </ol>
+                <div class="p-2 bg-light rounded text-xs text-monospace border">
+                    <strong>Required theme.json structure:</strong>
+                    <pre class="mb-0 mt-1" style="font-size: 0.75rem;">{
+  "name": "Nebula",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "description": "Modern Hosting Theme",
+  "dashboardVersion": "1.0.0"
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin-footer') %>

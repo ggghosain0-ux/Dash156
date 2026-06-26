@@ -1,0 +1,84 @@
+:root {
+  --primary: #00f2fe; /* Ice Cyan */
+  --primary-dark: #4facfe; /* Ice Blue */
+  --primary-light: #a1c4fd;
+  --secondary: #475569;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #06b6d4;
+  
+  --bg-primary: #030712; /* Dark Obsidian Space */
+  --bg-secondary: #0b0f19;
+  --bg-tertiary: #111827;
+  --bg-card: rgba(15, 23, 42, 0.45);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  
+  --border: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  
+  --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px 0 rgba(0, 242, 254, 0.15);
+}
+
+body {
+  background: radial-gradient(ellipse at bottom, #0d1b2a 0%, #030712 100%) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Glassmorphism containers */
+.category-card, .product-card, .invoice-card, .ticket-card, .dashboard-stat-card, .card {
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover, .product-card:hover, .card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 242, 254, 0.4) !important;
+  box-shadow: 0 12px 40px 0 rgba(0, 242, 254, 0.2) !important;
+}
+
+/* Glass Sidebar & Navbar styling */
+.sidebar, .navbar {
+  background: rgba(11, 15, 25, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.2) 100%) !important;
+  border-left: 3px solid #00f2fe !important;
+  color: #00f2fe !important;
+  font-weight: 600 !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+  border: none !important;
+  color: #030712 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px 0 rgba(0, 242, 254, 0.3) !important;
+}
+
+.btn-primary:hover {
+  opacity: 0.95;
+  box-shadow: 0 6px 20px 0 rgba(0, 242, 254, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.logo span {
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}

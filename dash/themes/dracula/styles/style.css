@@ -1,0 +1,86 @@
+:root {
+  --primary: #ff79c6; /* Dracula Pink */
+  --primary-dark: #bd93f9; /* Dracula Purple */
+  --primary-light: #ff92df;
+  --secondary: #6272a4; /* Dracula Comment/Gray */
+  --success: #50fa7b; /* Dracula Green */
+  --danger: #ff5555; /* Dracula Red */
+  --warning: #f1fa8c; /* Dracula Yellow */
+  --info: #8be9fd; /* Dracula Cyan */
+  
+  --bg-primary: #282a36; /* Dracula main background */
+  --bg-secondary: #1e1f29;
+  --bg-tertiary: #44475a; /* Dracula active line */
+  --bg-card: #1e1f29;
+  
+  --text-primary: #f8f8f2;
+  --text-secondary: #f8f8f2;
+  --text-muted: #6272a4;
+  
+  --border: #44475a;
+  --border-light: #bd93f9;
+  
+  --shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 30px 0 rgba(189, 147, 249, 0.2);
+}
+
+body {
+  background-color: #282a36 !important;
+  color: #f8f8f2 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Rounded Gothic boxes */
+.category-card, .product-card, .invoice-card, .ticket-card, .dashboard-stat-card, .card {
+  background-color: #1e1f29 !important;
+  border: 1px solid #44475a !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
+  border-radius: 6px !important;
+}
+
+.category-card:hover, .product-card:hover, .card:hover {
+  transform: translateY(-3px);
+  border-color: #ff79c6 !important;
+  box-shadow: 0 6px 20px rgba(255, 121, 198, 0.25) !important;
+}
+
+/* Sidebar structure */
+.sidebar {
+  background-color: #191a21 !important;
+  border-right: 1px solid #44475a !important;
+}
+
+.nav-link.active {
+  background-color: #44475a !important;
+  color: #ff79c6 !important;
+  border-left: 4px solid #ff79c6 !important;
+}
+
+.nav-link {
+  color: #f8f8f2 !important;
+}
+
+.nav-link:hover {
+  background-color: rgba(68, 71, 90, 0.5) !important;
+  color: #8be9fd !important;
+}
+
+/* Custom Dracula colored buttons */
+.btn-primary {
+  background-color: #bd93f9 !important;
+  border: 1px solid #bd93f9 !important;
+  color: #1e1f29 !important;
+  font-weight: bold !important;
+}
+
+.btn-primary:hover {
+  background-color: #ff79c6 !important;
+  border-color: #ff79c6 !important;
+  color: #1e1f29 !important;
+}
+
+.logo span {
+  color: #ff79c6 !important;
+  text-shadow: 0 0 10px rgba(255, 121, 198, 0.5);
+  font-weight: bold;
+}

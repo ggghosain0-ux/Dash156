@@ -1,6 +1,6 @@
 {
   "name": "VOIDORA CLOUD DASHBOARD",
-  "description": "Professional web hosting service with Razorpay integration, support tickets, and an advanced admin dashboard.",
+  "description": "Professional web hosting service with a modular Theme System, Razorpay integration, support tickets, and an advanced admin dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

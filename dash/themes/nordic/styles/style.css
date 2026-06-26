@@ -1,0 +1,87 @@
+:root {
+  --primary: #88c0d0; /* Frost Cyan */
+  --primary-dark: #81a1c1; /* Frost Ice Blue */
+  --primary-light: #8fbcbb; /* Frost Aurora Greenish */
+  --secondary: #4c566a;
+  --success: #a3be8c; /* Nord Sage Green */
+  --danger: #bf616a; /* Nord Coral Red */
+  --warning: #ebcb8b; /* Nord Amber Yellow */
+  --info: #5e81ac; /* Nord Deep Ice Blue */
+  
+  --bg-primary: #2e3440; /* Nord Polar Night */
+  --bg-secondary: #242933;
+  --bg-tertiary: #3b4252;
+  --bg-card: #3b4252;
+  
+  --text-primary: #eceff4; /* Nord Snow Storm */
+  --text-secondary: #e5e9f0;
+  --text-muted: #d8dee9;
+  
+  --border: #434c5e;
+  --border-light: #4c566a;
+  
+  --shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px 0 rgba(136, 192, 208, 0.12);
+}
+
+body {
+  background-color: #2e3440 !important;
+  color: #eceff4 !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+/* Rounded, cozy cards */
+.category-card, .product-card, .invoice-card, .ticket-card, .dashboard-stat-card, .card {
+  background-color: #3b4252 !important;
+  border: 1px solid #434c5e !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+  transition: all 0.25s ease-out;
+}
+
+.category-card:hover, .product-card:hover, .card:hover {
+  transform: translateY(-2px);
+  border-color: #88c0d0 !important;
+  box-shadow: 0 8px 25px rgba(136, 192, 208, 0.15) !important;
+}
+
+/* Sidebar structure */
+.sidebar {
+  background-color: #242933 !important;
+  border-right: 1px solid #3b4252 !important;
+}
+
+.nav-link.active {
+  background-color: #3b4252 !important;
+  color: #88c0d0 !important;
+  border-left: 4px solid #88c0d0 !important;
+  font-weight: 500 !important;
+}
+
+.nav-link {
+  color: #eceff4 !important;
+}
+
+.nav-link:hover {
+  background-color: rgba(59, 66, 82, 0.5) !important;
+  color: #8fbcbb !important;
+}
+
+/* Standard Nordic buttons */
+.btn-primary {
+  background-color: #88c0d0 !important;
+  border: 1px solid #88c0d0 !important;
+  color: #2e3440 !important;
+  font-weight: 600 !important;
+}
+
+.btn-primary:hover {
+  background-color: #81a1c1 !important;
+  border-color: #81a1c1 !important;
+  color: #2e3440 !important;
+}
+
+.logo span {
+  color: #88c0d0 !important;
+  font-weight: bold;
+}

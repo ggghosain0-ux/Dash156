@@ -1,0 +1,71 @@
+:root {
+  --primary: #d946ef; /* Glowing Fuchsia */
+  --primary-dark: #a21caf;
+  --primary-light: #f472b6;
+  --secondary: #64748b;
+  --success: #06b6d4; /* Neon Cyan */
+  --danger: #f43f5e; /* Coral Neon */
+  --warning: #fbbf24;
+  --info: #38bdf8;
+  
+  --bg-primary: #0a0518; /* Deep Space Purple */
+  --bg-secondary: #120a28;
+  --bg-tertiary: #1d113a;
+  --bg-card: rgba(18, 10, 40, 0.7);
+  
+  --text-primary: #fdfaff;
+  --text-secondary: #e9d5ff;
+  --text-muted: #a78bfa;
+  
+  --border: rgba(167, 139, 250, 0.2);
+  --border-light: rgba(167, 139, 250, 0.35);
+  
+  --shadow: 0 8px 32px 0 rgba(167, 139, 250, 0.1);
+  --shadow-lg: 0 16px 48px 0 rgba(217, 70, 239, 0.2);
+}
+
+/* Background Cosmic Ambient Gradient */
+body {
+  background: radial-gradient(circle at 10% 20%, #150931 0%, #05020c 90%) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Custom cards styling with neon glow & glassmorphism */
+.category-card, .product-card, .invoice-card, .ticket-card, .dashboard-stat-card {
+  background: rgba(18, 10, 40, 0.75) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(167, 139, 250, 0.2) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
+.category-card:hover, .product-card:hover {
+  transform: translateY(-5px);
+  border-color: #d946ef !important;
+  box-shadow: 0 0 20px rgba(217, 70, 239, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth active menu item */
+.nav-link.active {
+  background: linear-gradient(135deg, #d946ef 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Buttons overriding to use glowing effect */
+.btn-primary {
+  background: linear-gradient(135deg, #d946ef 0%, #8b5cf6 100%) !important;
+  border: none !important;
+  box-shadow: 0 0 10px rgba(217, 70, 239, 0.4) !important;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(217, 70, 239, 0.6) !important;
+}
+
+.logo span {
+  background: linear-gradient(135deg, #06b6d4 0%, #d946ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}

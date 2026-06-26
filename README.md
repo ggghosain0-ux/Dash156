@@ -1,90 +1,20 @@
-# VOIDORA CLOUD Hosting Dashboard
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-VOIDORA CLOUD is a modern hosting management dashboard designed to simplify server and application management. It provides an easy-to-use interface for deploying, monitoring, and managing your hosting environment.
+# Run and deploy your AI Studio app
 
-Features
+This contains everything you need to run your app locally.
 
-- Clean and modern dashboard UI
-- User and admin management system
-- Application deployment tools
-- Server monitoring and management
-- VPS and local installation support
-- Domain integration support
-- Easy setup process
-- Open-source and customizable
+View your app in AI Studio: https://ai.studio/apps/121cf4d6-5576-45fc-a8df-47dc661e78d5
 
----
+## Run Locally
 
-Installation Methods
+**Prerequisites:**  Node.js
 
-Method 1: Local Installation
 
-Use this method if you want to run Dash156 on your local machine or development environment.
-
-Step 1: Clone the Repository
-
-git clone https://github.com/ggghosain0-ux/Dash156.git
-cd Dash156
-
-Step 2: Run the Installer
-
-bash install-local.sh
-
-Step 3: Access the Dashboard
-
-After installation is completed, follow the instructions displayed in the terminal to access your dashboard.
-
----
-
-Method 2: VPS / Domain Installation
-
-Use this method if you want to install Dash156 on a VPS and access it through a domain.
-
-Step 1: Clone the Repository
-
-git clone https://github.com/ggghosain0-ux/Dash156.git
-cd Dash156
-
-Step 2: Run the VPS Installer
-
-bash install-vps.sh
-
-Step 3: Configure Your Domain
-
-Point your domain's DNS records to your VPS IP address and follow the installer instructions to complete the setup.
-
-Step 4: Access Your Dashboard
-
-Once installation is complete, open your domain in a web browser.
-
-Example:
-
-https://yourdomain.com
-
----
-
-Requirements
-
-- Linux-based operating system
-- Bash shell
-- Internet connection
-- Root or sudo access (recommended)
-
----
-
-Support
-
-If you encounter any issues, please open an issue on the GitHub repository.
-
-License
-
-This project is provided as-is. Feel free to modify and customize it according to your needs.
-
----
-
-Dash156 — Simple, Fast, and Powerful Hosting Management Dashboard
-
-default login
-
-email- admin@gmail.com
-password- admin
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

@@ -310,6 +310,184 @@ async function initDatabase() {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ======================
+// THEME SYSTEM FRAMEWORK
+// ======================
+const AdmZip = require('adm-zip');
+
+const CONFIG_DIR = path.join(__dirname, 'config');
+const THEME_CONFIG_PATH = path.join(CONFIG_DIR, 'theme.json');
+const THEMES_DIR = path.join(__dirname, 'themes');
+
+function copyDirSync(src, dest) {
+    fs.mkdirSync(dest, { recursive: true });
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+        if (entry.isDirectory()) {
+            copyDirSync(srcPath, destPath);
+        } else {
+            fs.copyFileSync(srcPath, destPath);
+        }
+    }
+}
+
+function ensureThemeSystem() {
+    if (!fs.existsSync(CONFIG_DIR)) {
+        fs.mkdirSync(CONFIG_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(THEMES_DIR)) {
+        fs.mkdirSync(THEMES_DIR, { recursive: true });
+    }
+    
+    // Create theme.json in config/ if not present
+    if (!fs.existsSync(THEME_CONFIG_PATH)) {
+        fs.writeFileSync(THEME_CONFIG_PATH, JSON.stringify({ active: "default" }, null, 2));
+    }
+    
+    // Create default theme structure and copy views
+    const defaultThemePath = path.join(THEMES_DIR, 'default');
+    if (!fs.existsSync(defaultThemePath)) {
+        fs.mkdirSync(defaultThemePath, { recursive: true });
+        fs.mkdirSync(path.join(defaultThemePath, 'pages'), { recursive: true });
+        fs.mkdirSync(path.join(defaultThemePath, 'layouts'), { recursive: true });
+        fs.mkdirSync(path.join(defaultThemePath, 'components'), { recursive: true });
+        fs.mkdirSync(path.join(defaultThemePath, 'assets'), { recursive: true });
+        fs.mkdirSync(path.join(defaultThemePath, 'styles'), { recursive: true });
+        
+        const defaultThemeJson = {
+            name: "Default",
+            version: "1.0.0",
+            author: "Voidora System",
+            description: "Default Hosting Dashboard Theme",
+            dashboardVersion: "1.0.0"
+        };
+        fs.writeFileSync(path.join(defaultThemePath, 'theme.json'), JSON.stringify(defaultThemeJson, null, 2));
+        
+        const transparentPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        fs.writeFileSync(path.join(defaultThemePath, 'preview.png'), Buffer.from(transparentPngBase64, 'base64'));
+        
+        const viewsDir = path.join(__dirname, 'views');
+        if (fs.existsSync(viewsDir)) {
+            console.log('Initializing Default Theme with base view files...');
+            copyDirSync(viewsDir, path.join(defaultThemePath, 'pages'));
+        }
+    }
+}
+
+function getActiveThemeName() {
+    try {
+        if (fs.existsSync(THEME_CONFIG_PATH)) {
+            const config = JSON.parse(fs.readFileSync(THEME_CONFIG_PATH, 'utf8'));
+            return config.active || 'default';
+        }
+    } catch (err) {
+        console.error('Error reading active theme config:', err);
+    }
+    return 'default';
+}
+
+function getRegisteredThemes() {
+    const themes = [];
+    if (!fs.existsSync(THEMES_DIR)) return themes;
+    
+    const folders = fs.readdirSync(THEMES_DIR, { withFileTypes: true });
+    for (const folder of folders) {
+        if (folder.isDirectory()) {
+            const themeDir = path.join(THEMES_DIR, folder.name);
+            const themeJsonPath = path.join(themeDir, 'theme.json');
+            if (fs.existsSync(themeJsonPath)) {
+                try {
+                    const info = JSON.parse(fs.readFileSync(themeJsonPath, 'utf8'));
+                    themes.push({
+                        id: folder.name,
+                        name: info.name || folder.name,
+                        version: info.version || '1.0.0',
+                        author: info.author || 'Unknown',
+                        description: info.description || 'No description provided.',
+                        dashboardVersion: info.dashboardVersion || '1.0.0',
+                        hasPreview: fs.existsSync(path.join(themeDir, 'preview.png'))
+                    });
+                } catch (err) {
+                    console.error(`Error parsing theme.json in ${folder.name}:`, err);
+                }
+            }
+        }
+    }
+    return themes;
+}
+
+// Override EJS resolution for includes to check dynamic theme paths
+const ejs = require('ejs');
+const originalResolveInclude = ejs.resolveInclude;
+
+ejs.resolveInclude = function(name, filename, isDir) {
+    const activeTheme = getActiveThemeName();
+    let resolved = originalResolveInclude(name, filename, isDir);
+    
+    if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+        return resolved;
+    }
+    
+    // Fallback: search in active theme, default theme layouts, pages, components
+    let logicalPath = name;
+    if (logicalPath.startsWith('./')) logicalPath = logicalPath.substring(2);
+    while (logicalPath.startsWith('../')) logicalPath = logicalPath.substring(3);
+    
+    const themesToTry = [activeTheme, 'default'].filter(Boolean);
+    for (const theme of themesToTry) {
+        const themeDir = path.join(THEMES_DIR, theme);
+        const candidates = [
+            path.join(themeDir, 'layouts', logicalPath + '.ejs'),
+            path.join(themeDir, 'pages', logicalPath + '.ejs'),
+            path.join(themeDir, 'components', logicalPath + '.ejs'),
+            path.join(themeDir, logicalPath + '.ejs')
+        ];
+        
+        for (const cand of candidates) {
+            if (fs.existsSync(cand)) {
+                return cand;
+            }
+        }
+    }
+    
+    const baseViewsDir = path.join(__dirname, 'views');
+    const baseCand = path.join(baseViewsDir, logicalPath + '.ejs');
+    if (fs.existsSync(baseCand)) {
+        return baseCand;
+    }
+    
+    return resolved;
+};
+
+// Initialize Theme System Directory & Config Structure
+ensureThemeSystem();
+
+function updateExpressViews() {
+    const activeTheme = getActiveThemeName();
+    const viewsDirs = [];
+    
+    if (activeTheme && activeTheme !== 'default') {
+        viewsDirs.push(
+            path.join(THEMES_DIR, activeTheme, 'pages'),
+            path.join(THEMES_DIR, activeTheme, 'layouts'),
+            path.join(THEMES_DIR, activeTheme, 'components'),
+            path.join(THEMES_DIR, activeTheme)
+        );
+    }
+    
+    viewsDirs.push(
+        path.join(THEMES_DIR, 'default', 'pages'),
+        path.join(THEMES_DIR, 'default', 'layouts'),
+        path.join(THEMES_DIR, 'default', 'components'),
+        path.join(THEMES_DIR, 'default')
+    );
+    
+    viewsDirs.push(path.join(__dirname, 'views'));
+    app.set('views', viewsDirs);
+}
+
 // Razorpay instance helper - dynamically loads from DB settings or fallbacks to .env
 function getRazorpayInstance(settings = {}) {
     const key_id = settings.razorpay_key_id || process.env.RAZORPAY_KEY_ID || 'rzp_test_1234567890abcdef';
@@ -324,11 +502,68 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: false,
-})); // Security headers to allow embedding in Google AI Studio preview iframe
+    })); // Security headers to allow embedding in Google AI Studio preview iframe
+
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+updateExpressViews();
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Dynamic Theme Asset Interceptor Middleware
+app.use((req, res, next) => {
+    const activeTheme = getActiveThemeName();
+    
+    if (req.path.startsWith('/admin/themes/preview/')) {
+        const themeId = path.basename(req.path);
+        const previewPath = path.join(THEMES_DIR, themeId, 'preview.png');
+        if (fs.existsSync(previewPath) && fs.statSync(previewPath).isFile()) {
+            return res.sendFile(previewPath);
+        } else {
+            return res.sendFile(path.join(THEMES_DIR, 'default', 'preview.png'));
+        }
+    }
+    
+    if (activeTheme && activeTheme !== 'default') {
+        let filePath = null;
+        if (req.path.startsWith('/css/')) {
+            const cleanPath = req.path.replace(/^\/css\//, '');
+            filePath = path.join(THEMES_DIR, activeTheme, 'styles', cleanPath);
+            if (!fs.existsSync(filePath)) {
+                filePath = path.join(THEMES_DIR, activeTheme, 'css', cleanPath);
+            }
+        } else if (req.path.startsWith('/images/')) {
+            const cleanPath = req.path.replace(/^\/images\//, '');
+            filePath = path.join(THEMES_DIR, activeTheme, 'assets', cleanPath);
+            if (!fs.existsSync(filePath)) {
+                filePath = path.join(THEMES_DIR, activeTheme, 'images', cleanPath);
+            }
+        } else if (req.path.startsWith('/js/')) {
+            const cleanPath = req.path.replace(/^\/js\//, '');
+            filePath = path.join(THEMES_DIR, activeTheme, 'assets', cleanPath);
+            if (!fs.existsSync(filePath)) {
+                filePath = path.join(THEMES_DIR, activeTheme, 'js', cleanPath);
+            }
+        }
+        
+        if (filePath && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            return res.sendFile(filePath);
+        }
+    }
+    next();
+});
+
+// Expose direct theme static assets mappings
+app.use('/theme-assets', (req, res, next) => {
+    const activeTheme = getActiveThemeName();
+    express.static(path.join(THEMES_DIR, activeTheme, 'assets'))(req, res, next);
+});
+
+app.use('/theme-styles', (req, res, next) => {
+    const activeTheme = getActiveThemeName();
+    express.static(path.join(THEMES_DIR, activeTheme, 'styles'))(req, res, next);
+});
+
 app.use(express.static(path.join(__dirname, 'public'))); // Serves /uploads if under public/uploads
 
 // Enhanced Rate Limiting
@@ -3227,6 +3462,244 @@ app.get('/admin/tickets/stats', requireAdmin, async (req, res) => {
         req.flash('error', 'Error loading stats');
         res.redirect('/admin/tickets');
     }
+});
+
+// ======================
+// THEME MANAGER ADMIN ROUTES
+// ======================
+const themeStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename: (req, file, cb) => cb(null, `theme-${Date.now()}-${file.originalname}`)
+});
+const themeUpload = multer({
+    storage: themeStorage,
+    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB Max
+    fileFilter: (req, file, cb) => {
+        if (file.originalname.endsWith('.zip') || file.mimetype === 'application/zip' || file.mimetype === 'application/x-zip-compressed') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only ZIP archives are allowed'), false);
+        }
+    }
+});
+
+app.get('/admin/themes', requireAdmin, async (req, res) => {
+    try {
+        res.render('admin/themes', {
+            title: 'Theme Manager',
+            activePage: 'themes',
+            themes: getRegisteredThemes(),
+            activeTheme: getActiveThemeName(),
+            messages: {
+                success: req.flash('success'),
+                error: req.flash('error')
+            }
+        });
+    } catch (err) {
+        console.error('Error rendering admin themes:', err);
+        req.flash('error', 'Failed to render themes manager.');
+        res.redirect('/admin/dashboard');
+    }
+});
+
+app.post('/admin/themes/activate/:id', requireAdmin, async (req, res) => {
+    const themeId = path.basename(req.params.id);
+    const themeDir = path.join(THEMES_DIR, themeId);
+    if (!fs.existsSync(themeDir) || !fs.statSync(themeDir).isDirectory()) {
+        req.flash('error', 'Selected theme was not found.');
+        return res.redirect('/admin/themes');
+    }
+    try {
+        fs.writeFileSync(THEME_CONFIG_PATH, JSON.stringify({ active: themeId }, null, 2));
+        updateExpressViews();
+        req.flash('success', `Theme "${themeId}" is now active!`);
+    } catch (err) {
+        console.error('Theme activation failed:', err);
+        req.flash('error', 'Error while activating theme.');
+    }
+    res.redirect('/admin/themes');
+});
+
+app.post('/admin/themes/disable/:id', requireAdmin, async (req, res) => {
+    try {
+        fs.writeFileSync(THEME_CONFIG_PATH, JSON.stringify({ active: 'default' }, null, 2));
+        updateExpressViews();
+        req.flash('success', 'Theme disabled. Reset to Default theme.');
+    } catch (err) {
+        console.error('Theme disable failed:', err);
+        req.flash('error', 'Error disabling theme.');
+    }
+    res.redirect('/admin/themes');
+});
+
+app.post('/admin/themes/duplicate/:id', requireAdmin, async (req, res) => {
+    const themeId = path.basename(req.params.id);
+    const sourceDir = path.join(THEMES_DIR, themeId);
+    if (!fs.existsSync(sourceDir)) {
+        req.flash('error', 'Source theme was not found.');
+        return res.redirect('/admin/themes');
+    }
+    try {
+        const destId = `${themeId}-copy-${Date.now().toString().slice(-4)}`;
+        const destDir = path.join(THEMES_DIR, destId);
+        copyDirSync(sourceDir, destDir);
+        
+        const themeJsonPath = path.join(destDir, 'theme.json');
+        if (fs.existsSync(themeJsonPath)) {
+            const info = JSON.parse(fs.readFileSync(themeJsonPath, 'utf8'));
+            info.name = `${info.name} (Copy)`;
+            fs.writeFileSync(themeJsonPath, JSON.stringify(info, null, 2));
+        }
+        
+        req.flash('success', `Theme duplicated as "${destId}" successfully.`);
+    } catch (err) {
+        console.error('Theme duplication failed:', err);
+        req.flash('error', 'Error while duplicating theme.');
+    }
+    res.redirect('/admin/themes');
+});
+
+app.post('/admin/themes/delete/:id', requireAdmin, async (req, res) => {
+    const themeId = path.basename(req.params.id);
+    if (themeId === 'default') {
+        req.flash('error', 'Cannot delete the base default theme.');
+        return res.redirect('/admin/themes');
+    }
+    const themeDir = path.join(THEMES_DIR, themeId);
+    if (!fs.existsSync(themeDir)) {
+        req.flash('error', 'Theme was not found.');
+        return res.redirect('/admin/themes');
+    }
+    try {
+        const activeTheme = getActiveThemeName();
+        if (activeTheme === themeId) {
+            fs.writeFileSync(THEME_CONFIG_PATH, JSON.stringify({ active: 'default' }, null, 2));
+            updateExpressViews();
+        }
+        fs.rmSync(themeDir, { recursive: true, force: true });
+        req.flash('success', `Theme "${themeId}" was deleted successfully.`);
+    } catch (err) {
+        console.error('Theme deletion failed:', err);
+        req.flash('error', 'Error while deleting theme.');
+    }
+    res.redirect('/admin/themes');
+});
+
+app.post('/admin/themes/refresh', requireAdmin, (req, res) => {
+    try {
+        ensureThemeSystem();
+        updateExpressViews();
+        req.flash('success', 'Theme cache refreshed successfully.');
+    } catch (err) {
+        console.error('Theme cache refresh failed:', err);
+        req.flash('error', 'Error refreshing themes.');
+    }
+    res.redirect('/admin/themes');
+});
+
+app.post('/admin/themes/upload', requireAdmin, themeUpload.single('theme_zip'), async (req, res) => {
+    if (!req.file) {
+        req.flash('error', 'Please upload a ZIP file.');
+        return res.redirect('/admin/themes');
+    }
+    const zipPath = req.file.path;
+    let zip;
+    try {
+        zip = new AdmZip(zipPath);
+    } catch (err) {
+        console.error('Error parsing uploaded ZIP file:', err);
+        helpers.deleteFile(zipPath);
+        req.flash('error', 'Corrupted or invalid ZIP archive file.');
+        return res.redirect('/admin/themes');
+    }
+    
+    try {
+        const zipEntries = zip.getEntries();
+        let themeJsonEntry = null;
+        let prefix = '';
+        
+        for (const entry of zipEntries) {
+            if (entry.entryName.endsWith('theme.json')) {
+                themeJsonEntry = entry;
+                prefix = entry.entryName.substring(0, entry.entryName.length - 'theme.json'.length);
+                break;
+            }
+        }
+        
+        if (!themeJsonEntry) {
+            helpers.deleteFile(zipPath);
+            req.flash('error', 'Invalid theme ZIP: Missing theme.json.');
+            return res.redirect('/admin/themes');
+        }
+        
+        let themeInfo;
+        try {
+            themeInfo = JSON.parse(themeJsonEntry.getData().toString('utf8'));
+        } catch (err) {
+            helpers.deleteFile(zipPath);
+            req.flash('error', 'Invalid theme ZIP: theme.json is corrupted or not valid JSON.');
+            return res.redirect('/admin/themes');
+        }
+        
+        if (!themeInfo.name) {
+            helpers.deleteFile(zipPath);
+            req.flash('error', 'Invalid theme ZIP: theme.json is missing the required "name" field.');
+            return res.redirect('/admin/themes');
+        }
+        
+        const themeId = themeInfo.name.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+        if (!themeId || themeId === 'default') {
+            helpers.deleteFile(zipPath);
+            req.flash('error', 'Invalid theme ZIP: Theme name matches the restricted ID "default" or is invalid.');
+            return res.redirect('/admin/themes');
+        }
+        
+        for (const entry of zipEntries) {
+            if (entry.entryName.includes('..')) {
+                helpers.deleteFile(zipPath);
+                req.flash('error', 'Security Violation: ZIP contains path traversal attempts.');
+                return res.redirect('/admin/themes');
+            }
+        }
+        
+        const targetDir = path.join(THEMES_DIR, themeId);
+        const tempExtractDir = path.join(THEMES_DIR, `temp-${Date.now()}`);
+        fs.mkdirSync(tempExtractDir, { recursive: true });
+        zip.extractAllTo(tempExtractDir, true);
+        
+        const actualThemeJsonPath = path.join(tempExtractDir, prefix, 'theme.json');
+        if (!fs.existsSync(actualThemeJsonPath)) {
+            fs.rmSync(tempExtractDir, { recursive: true, force: true });
+            helpers.deleteFile(zipPath);
+            req.flash('error', 'Failed to locate extracted theme folder.');
+            return res.redirect('/admin/themes');
+        }
+        
+        const sourceThemeDir = path.join(tempExtractDir, prefix);
+        
+        // Ensure folder structure
+        ['styles', 'assets', 'layouts', 'pages', 'components'].forEach(dir => {
+            const checkPath = path.join(sourceThemeDir, dir);
+            if (!fs.existsSync(checkPath)) {
+                fs.mkdirSync(checkPath, { recursive: true });
+            }
+        });
+        
+        if (fs.existsSync(targetDir)) {
+            fs.rmSync(targetDir, { recursive: true, force: true });
+        }
+        copyDirSync(sourceThemeDir, targetDir);
+        
+        fs.rmSync(tempExtractDir, { recursive: true, force: true });
+        helpers.deleteFile(zipPath);
+        
+        req.flash('success', `Theme "${themeInfo.name}" installed successfully as "${themeId}"!`);
+    } catch (err) {
+        console.error('Error installing uploaded theme:', err);
+        helpers.deleteFile(zipPath);
+        req.flash('error', `Installation error: ${err.message}`);
+    }
+    res.redirect('/admin/themes');
 });
 
 // Global 404 handler
